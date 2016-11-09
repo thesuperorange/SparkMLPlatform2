@@ -1,0 +1,88 @@
+@import play.api.mvc.Session
+@import play.mvc.Http.Session
+@(title: String)(content: Html)
+
+
+<html>
+    <head>
+        <title>@title</title>
+
+        <script src="http://d3js.org/d3.v3.min.js"></script>
+        <script type='text/javascript' src='http://code.jquery.com/jquery-1.7.1.min.js'></script>
+
+        <script language=JAVASCRIPT src="@routes.Assets.at("javascripts/ddsmoothmenu.js")"></script>
+
+        <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/main.css")">
+        <link rel="stylesheet" type="text/css" href="@routes.Assets.at("stylesheets/ddsmoothmenu.css")">
+
+        <script type="text/javascript">
+                ddsmoothmenu.init({
+                    mainmenuid: "smoothmenu1", 		//div id
+                    orientation: 'h', 				//horizontal or vertical
+                    classname: 'ddsmoothmenu', 		//ddsmoothmenu css template
+                    contentsource: "markup"	,	 	//"markup" or ["container_id", "path_to_menu_file"]
+                    customtheme: ["#8f1414", "#bc3315"] //background color & hover color
+                })
+
+        </script>
+
+
+    </head>
+
+    <body>
+
+
+        <div class="container">
+
+            <h1>Spark ML Platform</h1>
+
+                <!--Session.get("username");-->
+            <div align="right"><a href="@routes.Entrance.signin()" >login</a></div>
+
+            <div align="right"><a href="@routes.Entrance.signup()" >Signup</a></div>
+
+            <div align="right"><a href="@routes.Entrance.logout()" >logout</a></div>
+            <div id="smoothmenu1" >
+
+                <ul >
+                    <li> <a href="@routes.Entrance.index()">Home</a> </li>
+                    <li><a href="#">Simple</a>
+                        <ul>
+
+                            <li>  <a href="@routes.Entrance.dataimport_pre1">DataImport Pre1 </a></li>
+                            <li><a href="@routes.Entrance.dataimport_pre2">DataImport Pre2 </a></li>
+                            <li><a href="@routes.Entrance.dataimport_nov">DataImport Direct </a></li>
+
+                        </ul>
+                    </li>
+                    <li><a href="#">Train Model</a>
+                        <ul >
+                            <li><a href="@routes.Entrance.linear_reg_param()">LinearRegression</a></li>
+                         <!--   <li><a href="@routes.Entrance.simp_reg()">test</a></li>-->
+
+                            <li><a href="@routes.Entrance.log_reg()">LogisticRegression</a></li>
+                            <li><a href="@routes.Entrance.kmeans()">Kmeans</a></li>
+                            <li><a href="@routes.Entrance.pca()">PCA</a></li>
+
+
+                        </ul>
+                    </li>
+                    <li><a href="#" >Machine Learning </a>
+                        <ul >
+                            <li><a href="@routes.Entrance.reg_trans()">LinearRegression</a></li>
+                            <li><a href="#">LogisticRegression</a></li>
+                            <li><a href="#">Kmeans</a></li>
+                            <li><a href="#">PCA</a></li>
+                        </ul>
+                    </li>
+
+
+                </ul>
+                <br style="clear: left" />
+            </div>
+
+        </div>
+
+
+    @content
+    </body></html>

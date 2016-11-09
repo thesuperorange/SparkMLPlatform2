@@ -1,0 +1,176 @@
+@import helper._
+
+@(csvInput: Form[(String)], pre2data: List[String],jsonString: String)(implicit messages: Messages)
+    @main(title = "Linear Regression") {
+
+
+        <h3>Data Preprocess 2</h3>
+        @if(jsonString==null ){
+            @form(action = routes.Preprocess.preprocess2) {
+
+                <fieldset>
+
+                    <legend>from SQL</legend>
+
+
+                    @select(
+                        field = csvInput("path"),
+                        options(pre2data),
+                        '_label -> "Select your parquet name")
+
+
+
+                    <div class="submit">
+                        <input type="submit" id="submit" value="submit">
+                    </div>
+                </fieldset>
+
+            }
+        }
+        @if(pre2data==null ){
+            <script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
+
+
+            <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/d3/bar.css")">
+            <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/d3/pie.css")">
+            <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/d3/hist.css")">
+            <script src='@routes.Assets.at("javascripts/d3/bar.js")'></script>
+            <script src='@routes.Assets.at("javascripts/d3/pie.js")'></script>
+            <script src="@routes.Assets.at("javascripts/d3/box.js")"></script>
+            <script src="@routes.Assets.at("javascripts/d3/histo.js")"></script>
+
+            <h2> Feature Visualization</h2>
+            <h3>Choose one column as your label and save it!</h3>
+            <script>
+
+                    var form = document.createElement("form");
+                    form.method='POST';
+                    form.action = '@routes.Preprocess.convertVector';
+
+
+                    var inputFilename = document.createElement("input");
+                    inputFilename.type='hidden'
+                    inputFilename.value='@csvInput("path").value'
+                    inputFilename.name = 'inputFile'
+                    form.appendChild(inputFilename);
+
+
+                    var pieData2 = @Html(jsonString)
+
+                    var table = document.createElement('table');
+                    table.setAttribute('class','table-style-three')
+
+                    var tr1 = document.createElement('tr');
+                    var column_num = 6;
+                    var header = ['column name','type','chart','chart','feature','label']
+                    var th=[];
+                    for(i=0;i<column_num;i++)
+                    {
+                        th[i] =document.createElement('th');
+                        th[i].appendChild(document.createTextNode(header[i]));
+                        tr1.appendChild(th[i]);
+                    }
+                    table.appendChild(tr1);
+
+                    for (var i = 0; i < pieData2.length; i++){
+                        if(pieData2[i]==undefined) break;
+                        var tr2 = document.createElement('tr');
+                        var td=[];
+                        for(j=0;j<column_num;j++)
+                        {
+                            td[j] =document.createElement('td');
+                            tr1.appendChild(th[j]);
+                        }
+
+
+
+                        var content = [];
+                        content[0] = document.createTextNode(pieData2[i].columnName);
+                        content[1]= document.createTextNode(pieData2[i].type);
+
+                        //div
+                        content[2] = document.createElement('div');
+                        content[2].id = 'piechart'+i;
+                        //div
+                        content[3] = document.createElement('div');
+                        content[3].id = 'barchart'+i;
+                        //radio
+                        content[4] = document.createElement('input');
+                        content[4].type = "radio"
+                        content[4].name= pieData2[i].columnName;
+                        content[4].value='feature'
+                        content[4].setAttribute("checked", "checked");
+                        //radio
+                        content[5] = document.createElement('input');
+                        content[5].type = "radio"
+                        content[5].name= pieData2[i].columnName;
+                        content[5].value='label'
+
+                        for(j=0;j<column_num;j++)
+                        {
+                            td[j] .appendChild(content[j]);
+                            tr2.appendChild(td[j]);
+                        }
+
+                        table.appendChild(tr2);
+                    }
+
+                    form.appendChild(table)
+
+
+                    form.appendChild(document.createElement("br"));
+                    form.appendChild(document.createTextNode("Output name"));
+                    var outputPath = document.createElement("input");
+                    outputPath.type='text'
+                    outputPath.name = 'outputFolder'
+                    form.appendChild(outputPath);
+
+                    form.appendChild(document.createElement("br"));
+                    form.appendChild(document.createElement("br"));
+
+
+
+                    var button = document.createElement("input");
+                    button.type='submit'
+                    button.id='saveto'
+                    button.value='save'
+                    form.appendChild(button);
+
+
+
+
+
+                    document.body.appendChild(form);
+
+
+                    for(i=0;i<pieData2.length;i++) {
+                        if(pieData2[i].type =="StringType") {
+                            d3.select('#piechart' + i).datum(pieData2[i].category).call(pie());
+                            d3.select('#barchart'+i).datum(pieData2[i].category).call(bar());
+                        }
+                        else{
+                            var data = pieData2[i].boxplot
+                            var boxplotData =[], count =0;
+                            var d=[];
+                            for (var property in data)
+                            {
+                                d.push(property);
+                                count++;
+                            }
+                            for(var j = 0;j<count;j++){
+                                boxplotData[j]=[];
+                                boxplotData[j][0]=d[j];
+                                boxplotData[j][1] = data[d[j]]
+                            }
+                            d3.select('#piechart' + i).datum(boxplotData).call(boxplot(count));
+
+                            d3.select('#barchart'+i).datum(pieData2[i].histogram).call(histogram());
+
+
+                        }
+                    }
+            </script>
+        }
+
+
+    }

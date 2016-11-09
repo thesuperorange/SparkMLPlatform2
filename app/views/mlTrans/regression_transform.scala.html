@@ -1,0 +1,38 @@
+@import helper._
+
+@(param: Form[(String, String)], pre2data: List[String], model: List[String], regResult: String)(implicit messages: Messages)
+    @main(title = "Linear Regression") {
+
+        @if(pre2data != null) {
+            <h3>Linear Regression</h3>
+            @form(action = routes.Regression.transformRegression()) {
+                <fieldset>
+
+                    <legend>Input Parameters</legend>
+
+
+                    @select(
+                        field = param("inputpath"),
+                        options(pre2data),
+                        '_label -> "Select your parquet name")
+
+                    @select(
+                        field = param("model"),
+                        options(model),
+                        '_label -> "Select your model name")
+
+                    <div class="submit">
+                        <input type="submit" id="submit" value="submit">
+                    </div>
+                </fieldset>
+
+            }
+        }
+
+        @if(regResult != null) {
+
+            @regResult
+            <br>
+
+        }
+    }

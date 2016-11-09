@@ -1,0 +1,57 @@
+# Routes
+# This file defines all application routes (Higher priority routes first)
+# ~~~~
+
+# Home page
+GET     /                       controllers.Entrance.index
+
+### data preprocess
+GET     /dataimport_pre1        controllers.Entrance.dataimport_pre1
+POST     /preprocess1           controllers.Preprocess.preprocess1_summary
+POST     /preprocess1_rmcol     controllers.Preprocess.preprocess1_rmcol
+
+GET     /dataimport_pre2        controllers.Entrance.dataimport_pre2
+POST     /preprocess2           controllers.Preprocess.preprocess2
+POST     /preprocess2_convec    controllers.Preprocess.convertVector
+
+GET     /dataimport_nov         controllers.Entrance.dataimport_nov
+POST     /preprocessD           controllers.Preprocess.preprocess_direct
+
+
+#######mllib
+
+POST    /linearRegression2                   controllers.RegressionSimple.callRegression
+GET     /linearRegression_param2          controllers.Entrance.simp_reg
+
+
+GET     /linearRegression_param           controllers.Entrance.linear_reg_param
+POST    /linearRegression                   controllers.Regression.callRegression
+
+
+GET     /regModel               controllers.Entrance.reg_trans
+POST    /regTrans               controllers.Regression.transformRegression
+
+GET     /logregparam             controllers.Entrance.log_reg
+POST    /logisticRegression      controllers.Classification.callLogistic
+
+GET     /pca                    controllers.Entrance.pca
+POST    /pcaResult              controllers.FeatureSelection.callPCA
+
+GET     /kmeans                 controllers.Entrance.kmeans
+POST    /kmeansResult           controllers.Clustering.callKmeans
+
+#GET     /decisionTree           controllers.Basic.decisionTree
+#POST     /dtResult              controllers.Classification.callDecisionTree_new
+
+POST     /savemodel              controllers.Simple.saveModel
+
+GET     /logout                  controllers.Entrance.logout
+GET     /signin                  controllers.Entrance.signin
+GET     /signup                  controllers.Entrance.signup
+POST    /signUpData              controllers.SignIn.signUp
+POST    /signData                controllers.SignIn.signIn
+GET     /show                    controllers.SignIn.show
+
+# Map static resources from the /public folder to the /assets URL path
+GET     /assets/*file            controllers.Assets.at(path="/public", file)
+#GET  /d3/boxplot.html           controllers.Assets.at(path="/public/d3", file="boxplot.html")

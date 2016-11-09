@@ -1,0 +1,137 @@
+@import helper._
+
+@(param: Form[(String, String, String, String)], pre2data: List[String], regResult: logRegModel)(implicit messages: Messages)
+    @main(title = "Linear Regression") {
+
+        @if(pre2data != null) {
+            @form(action = routes.Classification.callLogistic()) {
+
+                <h3>Logistic Regression</h3>
+
+
+                <fieldset>
+
+                    <legend>Input Parameters</legend>
+
+                    @select(
+                        field = param("inputpath"),
+                        options(pre2data),
+                        '_label -> "Select your parquet name")
+                    @**inputText(
+                    field = param("inputpath"),
+                    args = '_label -> "Regression -- csv path", 'placeholder -> "inputpath"
+                    )**@
+                    @inputText(
+                        field = param("maxIter"),
+                        args = '_label -> "MaxIter", 'placeholder -> "10", 'value -> "10"
+                    )
+                    @inputText(
+                        field = param("regParam"),
+                        args = '_label -> "Reg Param", 'placeholder -> "0.3", 'value -> "0.3"
+                    )
+                    @inputText(
+                        field = param("elaParam"),
+                        args = '_label -> "Elastic Param", 'placeholder -> "0.8", 'value -> "0.8"
+                    )
+                    <div class="submit">
+                        <input type="submit" id="submit" value="submit">
+                    </div>
+                </fieldset>
+
+            }
+        }
+
+        @if(regResult != null) {
+            <script src='@routes.Assets.at("javascripts/d3/ROC.js")'></script>
+            <script src='@routes.Assets.at("javascripts/d3/TPRFPR.js")'></script>
+            <script src="@routes.Assets.at("javascripts/d3/bar_hori.js")"></script>
+            <style>
+            .tick line{
+            opacity: 0.1;
+            }
+            </style>
+            <script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
+            <link rel="stylesheet" type="text/css" href="@routes.Assets.at("stylesheets/d3/roc.css")">
+            <h2>Logistic Regression</h2>
+            <h3>Coefficient</h3>
+            <div class="col-sm-6" id="coef">  </div><br>
+
+            <script>
+
+                    var coef = @Html(regResult.coefficients);
+                    d3.select('#coef' ).datum(coef).call(bar());
+                    //--------coefficient table-----------------------------
+                    var table = document.createElement('table');
+                    table.setAttribute('class','table-style-three')
+
+                    //thead
+                    var tr1 = document.createElement('tr');
+                    var column_num = coef.length+1;
+
+                    var th=[];
+                    th[0]=document.createElement('th');
+                    th[0].appendChild(document.createTextNode('intercept'));
+                    tr1.appendChild(th[0]);
+                    for(i=1;i<column_num;i++)
+                    {
+                        th[i] =document.createElement('th');
+                        th[i].appendChild(document.createTextNode(coef[i-1]['coef']));
+                        tr1.appendChild(th[i]);
+                    }
+                    table.appendChild(tr1);
+
+                    var tr2 = document.createElement('tr');
+                    var td=[];
+                    td[0]=document.createElement('td');
+                    td[0].appendChild(document.createTextNode(@regResult.intercept));
+                    tr2.appendChild(td[0]);
+                    for(i=1;i<column_num;i++)
+                    {
+                        td[i] =document.createElement('td');
+                        td[i].appendChild(document.createTextNode(coef[i-1]['count']));
+                        tr2.appendChild(td[i]);
+                    }
+                    table.appendChild(tr2);
+                    document.body.appendChild(table);
+            </script>
+            <br>
+            <h3>ROC Curve</h3>
+            <h4>area under ROC = @regResult.areaUnderROC</h4>
+            <div class="col-sm-12" id="ROC"></div>   <br>
+
+            <h3>TPR FPR  F-measurement</h3>
+            <div class="col-sm-12" id="c2486"></div>   <br>
+
+
+
+            <script>
+
+
+
+                    /*==============================ROC==================*/
+                    var data9 = {
+                        "TPR":[@regResult.TPR],
+                        "FPR":[@regResult.FPR]
+                    };
+                    d3.select('#ROC').datum(data9).call(Roc());
+                    /*=====================================2486chart==========================*/
+                    var data10 = {
+                        "threshold": [@regResult.threshold],
+                        "recall": [@regResult.recallJson],
+                        "precise": [@regResult.precisionJson],
+                        "fmeasure": [@regResult.fmeasureJson],
+                        "neutralLine":[@regResult.bestTH]
+                    };
+                    d3.select('#c2486').datum(data10).call(c2486());
+
+
+
+            </script>
+            @regResult.coefficients
+            <br>
+            @regResult.intercept
+
+
+
+        }
+    }

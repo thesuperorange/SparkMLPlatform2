@@ -1,0 +1,40 @@
+@import play.api.mvc.Session
+@(string:String)
+
+    @main(title = "User Guide") {
+    <br>
+    <a href = "#step1">Step 1: Import Data from HDFS</a>
+    <br>
+    <a href = "#step2">Step 2: Convert Dataframe to Vector</a>
+    <br>
+    <a href = "#step3">Step 3: Build machine learning Model</a>
+    <br>
+    <a href = "#step4">Step 4: Using your model to predict result</a>
+    <br>
+<h2 id="step1">Step 1: Import Data from HDFS</h2>
+
+        <h3>輸入要匯入的csv檔案在hdfs中的路徑</h3>
+    <img src="@routes.Assets.at("images/UserGuide/1.1pre.png")">
+    <h3>將會看到correlation matrix以及Summary Statistics基本統計資訊</h3>
+    <img src="@routes.Assets.at("images/UserGuide/1.2correlation.png")">
+    <h3>Feature數目多的時候，Correlation Matrix以heat map表示</h3>
+    <img src="@routes.Assets.at("images/UserGuide/1.3correlation.png")">
+    <h3>轉換數值與類別型態，並選擇不必要的欄位</h3>
+    <img src="@routes.Assets.at("images/UserGuide/1.4summary.png")">
+    <br>
+  <h2  id="step2">Step 2: Convert Dataframe to Vector</h2>
+    <h3>選擇經過前處理的DataFrame</h3>
+    <img src="@routes.Assets.at("images/UserGuide/2.1pre2.png")">
+
+    <h3>選擇label(Unsupervised learning可不選)，將features轉換成vector</h3>
+    <img src="@routes.Assets.at("images/UserGuide/2.2visual.png")">
+    <br>
+    <h2  id="step3">Step 3: Build machine learning Model</h2>
+        <h3>選擇Machine learning演算法</h3>
+    <img src="@routes.Assets.at("images/UserGuide/3.1lr.png")">
+
+    <h3>Model資訊視覺化呈現</h3>
+    <img src="@routes.Assets.at("images/UserGuide/3.2visual.png")">
+    <br>
+    <h2  id="step4">Step 4: Using your model to predict result</h2>
+    }

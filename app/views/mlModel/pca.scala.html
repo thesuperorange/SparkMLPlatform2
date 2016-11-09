@@ -1,0 +1,44 @@
+@import helper._
+
+@(myForm: Form[(String,String)], parquetlist: List[String],result:String)(implicit messages: Messages)
+
+
+  @main(title = "PCA") {
+
+
+    <h3>Principal Component Analysis</h3>
+    @if(parquetlist != null) {
+      @form(action = routes.FeatureSelection.callPCA()) {
+        <fieldset>
+
+          <legend>Input Parameters</legend>
+          @select(
+            field = myForm("path"),
+            options(parquetlist),
+            '_label -> "Select your parquet name")
+
+          @inputText(
+            field = myForm("k"),
+            args = '_label -> "k", 'placeholder -> "3"
+          )
+
+          <div class="submit">
+            <input type="submit" id="submit" value="submit">
+          </div>
+        </fieldset>
+      }
+    }
+
+    @if(result != null) {
+      <script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
+      <script src='@routes.Assets.at("javascripts/d3/line.js")'></script>
+      <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/d3/line.css")">
+      <h3>陡坡圖</h3>
+      <div class="col-sm-12" id="linechart"></div>
+
+      <script>
+              d3.select('#linechart').datum(@Html(result)).call(line());
+      </script>
+
+    }
+  }

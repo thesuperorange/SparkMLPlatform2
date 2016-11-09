@@ -1,0 +1,32 @@
+@import helper._
+@import util.InputForms
+@(myForm: Form[(String, String)])(implicit messages: Messages)
+
+
+<link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/main.css")">
+<div align="center">
+    <br><br>
+    <h3>Sign in</h3>
+
+    @form(action = routes.SignIn.signIn) {
+        <fieldset>
+
+            <legend>Input Parameters</legend>
+
+
+            @inputText(
+                field = myForm("username"),
+                args = '_label -> "username"
+            )
+
+            @inputPassword(
+                field = myForm("password"),
+                args = '_label -> "password"
+            )
+
+            <div class="submit">
+                <input type="submit" id="submit" value="submit">
+            </div>
+        </fieldset>
+    </div>
+}

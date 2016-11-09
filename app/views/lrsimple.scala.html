@@ -1,0 +1,56 @@
+@import helper._
+@(param: Form[(String, String, String, String)], regResult: String)(implicit messages: Messages)
+@main(title = "Linear Regression") {
+
+
+@if(regResult == null) {
+
+<h3>Linear Regression</h3>
+@form(action = routes.RegressionSimple.callRegression,'class -> "registration_form") {
+
+
+
+<fieldset>
+
+    <legend>Input Parameters</legend>
+
+    @inputText(
+    field = param("inputpath"),
+    args = '_label -> "Regression -- csv path", 'placeholder -> "inputpath"
+    )
+    @inputText(
+
+    field = param("maxIter"),
+    args = '_label -> "MaxIter", 'value -> "10"
+    )
+    @inputText(
+    field = param("regParam"),
+    args = '_label -> "Reg Param", 'placeholder -> "0.3", 'value -> "0.3"
+    )
+    @inputText(
+    field = param("elaParam"),
+    args = '_label -> "Elastic Param", 'placeholder -> "0.8", 'value -> "0.8"
+    )
+
+
+    <div class="submit">
+        <input type="submit" id="submit" value="submit">
+    </div>
+</fieldset>
+}
+
+}
+
+@if(regResult != null) {
+<h2>Linear Regression</h2>
+<h3>Coefficient</h3>
+
+<br>
+@regResult
+<br>
+
+
+
+
+}
+}

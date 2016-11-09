@@ -1,0 +1,56 @@
+@import helper._
+
+@(myForm: Form[(String, String)], parquetlist: List[String], center: List[String],result:String)(implicit messages: Messages)
+
+
+<script src="@routes.Assets.at("javascripts/d3/pairs.js")" type="text/javascript"></script>
+<link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/d3/pairs.css")">
+  @main(title = "Kmeans") {
+
+
+    <h3>Kmeans</h3>
+    @if(parquetlist != null) {
+      @form(action = routes.Clustering.callKmeans) {
+        <fieldset>
+
+          <legend>Input Parameters</legend>
+          @select(
+            field = myForm("path"),
+            options(parquetlist),
+            '_label -> "Select your parquet name")
+
+          @inputText(
+            field = myForm("k"),
+            args = '_label -> "k", 'placeholder -> "3"
+          )
+
+
+          <div class="submit">
+            <input type="submit" id="submit" value="submit">
+          </div>
+        </fieldset>
+      }
+    }
+
+  @if(center != null) {
+    center= <br/>
+    @for( item<-center){
+        @item <br/>
+    }
+
+
+
+  }
+
+  @if(result != null) {
+
+
+    <div class="col-sm-12" id="scattermatrix"></div>
+    <script>
+            d3.select('#scattermatrix').datum(@result).call(scattermatrix());
+    </script>
+
+
+
+  }
+}

@@ -1,0 +1,200 @@
+@import helper._
+
+@(csvInput: Form[(String,Boolean)],header:String,datatype: Seq[(String, String)], summary: Form[StatSummary],corMatrix:String)(implicit messages: Messages)
+
+@main(title = "Input Radio Group Sample") {
+
+    <h3>Data Preprocess 1</h3>
+
+
+    @if(datatype==null && summary==null && corMatrix ==null){
+        @form(action = routes.Preprocess.preprocess1_summary()) {
+            <fieldset>
+
+                <legend>Input Parameters</legend>
+                @inputText(
+                    csvInput("path"),
+                    '_label -> "CSV path",
+                    'placeholder -> "path of your csv in hdfs"
+                )
+                @checkbox(
+                    csvInput("header"),
+                    /*'label->"Confirm:",'_text->"Is first line header?",*/'_help->""
+                )
+                <div class="submit">
+                    <input type="submit" id="submit" value="submit">
+                </div>
+            </fieldset>
+        }
+    }
+
+    @if(datatype!=null && summary!=null && corMatrix !=null){
+        <script src="@routes.Assets.at("javascripts/d3/correlation.js")"></script>
+        <link rel="stylesheet" href="@routes.Assets.at("stylesheets/d3/corr.css")">
+
+
+
+        <h2> Correlation Matrix</h2>
+
+
+        <label>InputFile Path: </label> @csvInput("path").value
+
+        <br>
+
+        <div class="col-sm-12" id="correlation"></div>
+        <script>
+                var corData = @Html(corMatrix)
+                        d3.select('#correlation').datum(corData).call(heatmap());
+        </script>
+
+        <br>
+        <h2> Statistical Summary</h2>
+        <h3> Convert column type and save it!</h3>
+        <script>
+
+                var form = document.createElement("form");
+                form.method='POST';
+                form.action = '@routes.Preprocess.preprocess1_rmcol';
+
+
+                var inputFilename = document.createElement("input");
+                inputFilename.type='hidden'
+                inputFilename.value='@csvInput("path").value'
+                inputFilename.name = 'inputFile'
+                form.appendChild(inputFilename);
+
+
+                var header = document.createElement("input");
+                header.type='hidden'
+                header.value='@header'
+                header.name = 'header'
+                form.appendChild(header);
+
+                var mean = @summary.get.mean
+                var max = @summary.get.max
+                var min = @summary.get.min
+                var variance = @summary.get.variance
+                var numNonzeros = @summary.get.numNonzeros
+
+
+                var table = document.createElement('table');
+                table.setAttribute('class','table-style-three')
+                // table.class="table-style-three"
+                var tr1 = document.createElement('tr');
+
+                var colName = ['column name','max','mean','min','var','nonZeros','category','numeric','removal']
+                var th=[];
+                for(i=0;i<colName.length;i++)
+                {
+                    th[i] =document.createElement('th');
+                    th[i].appendChild(document.createTextNode(colName[i]));
+                    tr1.appendChild(th[i]);
+                }
+                table.appendChild(tr1);
+
+
+                var headerArray=new Array();
+
+
+
+
+
+                @for( (item, index) <- datatype.zipWithIndex) {
+
+                var i=@index
+                        headerArray.push("@item._1");
+
+                var tr2 = document.createElement('tr');
+                var td=[];
+                for(j=0;j<colName.length;j++)
+                {
+                    td[j] =document.createElement('td');
+                    tr1.appendChild(th[j]);
+                }
+                var content = [];
+
+
+                @**if(item._2 == "IntegerType" || item._2 == "DoubleType") {**@
+                content[0] = document.createTextNode("@item._1");
+                content[1]= document.createTextNode(mean[i]);
+                content[2]= document.createTextNode(max[i]);
+                content[3]= document.createTextNode(min[i]);
+                content[4]= document.createTextNode(variance[i]);
+                content[5]= document.createTextNode(numNonzeros[i]);
+
+
+
+
+
+
+
+                //div category  input radio, label
+                var div = document.createElement('div');
+                content[6] = document.createElement('input');
+                content[6].type = "radio"
+                content[6].name= "@item._1";
+                content[6].value='category'
+                @if(item._2 != "IntegerType" && item._2 != "DoubleType") {
+                content[6].setAttribute("checked", "checked");
+                }
+
+
+                //div category  input radio, label
+                //var div = document.createElement('div');
+                content[7] = document.createElement('input');
+                content[7].type = "radio"
+                content[7].name= "@item._1";
+                content[7].value='numeric'
+                @if(item._2 == "IntegerType" || item._2 == "DoubleType") {
+                content[7].setAttribute("checked", "checked"); } else{
+                content[7].setAttribute("disabled", "disabled");
+                }
+                content[8] = document.createElement('input');
+                content[8].type = "radio"
+                content[8].name= "@item._1";
+                content[8].value='removal'
+
+
+                td[6].appendChild(div)
+
+                for(j=0;j<colName.length;j++)
+                {
+                    td[j] .appendChild(content[j]);
+                    tr2.appendChild(td[j]);
+                }
+
+
+                table.appendChild(tr2);
+                }
+
+
+                form.appendChild(table);
+
+                form.appendChild(document.createElement("br"));
+                form.appendChild(document.createTextNode("Output name"));
+                var outputPath = document.createElement("input");
+                outputPath.type='text'
+                outputPath.name = 'outputFolder'
+                form.appendChild(outputPath);
+
+                form.appendChild(document.createElement("br"));
+                form.appendChild(document.createElement("br"));
+
+
+
+                var button = document.createElement("input");
+                button.type='submit'
+                button.id='saveto'
+                button.value='save'
+                form.appendChild(button);
+
+
+                document.body.appendChild(form);
+
+
+                // alert(headerArray);
+
+        </script>
+
+    }
+}

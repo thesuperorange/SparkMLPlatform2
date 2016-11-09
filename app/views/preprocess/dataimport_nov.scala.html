@@ -1,0 +1,35 @@
+@import helper._
+
+@(csvInput: Form[(String,Boolean,String)])(implicit messages: Messages)
+
+    @main(title = "ImportData without Visulization") {
+
+        <h3>Data Preprocess Directly</h3>
+
+
+        @form(action = routes.Preprocess.preprocess_direct()) {
+            <fieldset>
+
+                <legend>Input Parameters</legend>
+                @inputText(
+                    csvInput("inputpath"),
+                    '_label -> "CSV path",
+                    'placeholder -> "path of your csv in hdfs"
+                )
+                @checkbox(
+                    csvInput("header"),
+                    /*'label->"Confirm:",'_text->"Is first line header?",*/'_help->""
+                )
+                @inputText(
+                    csvInput("outputfolder"),
+                    '_label -> "parquet output folder",
+                    'placeholder -> "output name"
+                )
+
+                <div class="submit">
+                    <input type="submit" id="submit" value="submit">
+                </div>
+            </fieldset>
+        }
+    }
+
