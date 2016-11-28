@@ -66,6 +66,7 @@ class Clustering @Inject()(val messagesApi: MessagesApi) extends Controller with
           var str = ""
           for (i <- 0 to headerSize - 1) {
             str += "f" + i + ":[" + seqDF.select("f"+i).rdd.map(x=>x(0)).collect.mkString(",") + "],"
+            /*dddddddddddddddd*/
           }
           JsonStr += str.substring(0, str.length - 1) + "}"
 

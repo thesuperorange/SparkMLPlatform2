@@ -15,12 +15,18 @@ import views.html
   */
 class Classification  @Inject()(val messagesApi: MessagesApi) extends Controller with I18nSupport{
   def callLogistic = Action { implicit request =>
-    var user = request.session.get("username").get
+
     InputForms.elasticInput.bindFromRequest.fold(
       formWithErrors => {
         println("ERROR" + formWithErrors)
         BadRequest("error in callRegression")
       }, { case (inputFilename, maxIter, regParam, elaParam) =>
+        var jeffrey = ""
+        request.session.get("username").map { user =>
+          jeffrey = user
+        }.getOrElse {
+          jeffrey = "NULL"
+        }
         val SPARK = new SparkConfCreator(Utilities.master,this.getClass.getSimpleName)
         val SparkSession = SPARK.getSession()
         val sc = SPARK.getSC()
@@ -28,7 +34,7 @@ class Classification  @Inject()(val messagesApi: MessagesApi) extends Controller
 
         try {
 
-          val df = SparkSession.read.load(user+"/"+inputFilename)
+          val df = SparkSession.read.load(jeffrey+"/"+inputFilename)
           val lr = new LogisticRegression().setMaxIter(maxIter.toInt).setRegParam(regParam.toDouble).setElasticNetParam(elaParam.toDouble).setLabelCol("label").setFeaturesCol("features")
           val lrModel = lr.fit(df)
 
