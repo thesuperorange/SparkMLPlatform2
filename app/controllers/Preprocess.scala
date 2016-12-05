@@ -144,7 +144,13 @@ class Preprocess @Inject()(db: Database)(val messagesApi: MessagesApi) extends C
         var categoryCol: List[String] = List()
         var dropCol: List[String] = List()
         var header = "false"
-        val user = request.session.get("username").get
+        //val user = request.session.get("username").get
+        var jeffrey = ""
+        request.session.get("username").map { user =>
+          jeffrey = user
+        }.getOrElse {
+          jeffrey = "NULL"
+        }
 
         request.body.asFormUrlEncoded.get.foreach {
           //request.queryString.foreach {
@@ -185,9 +191,9 @@ class Preprocess @Inject()(db: Database)(val messagesApi: MessagesApi) extends C
             tempdf = tempdf.withColumn(castme, tempdf(castme).cast(StringType))
           }
         }
-        tempdf.write.parquet(user+"/"+outputFolder)
+        tempdf.write.parquet(jeffrey+"/"+outputFolder)
 
-        DB.insertPre1(outputFolder,inputFilename,user)
+        DB.insertPre1(outputFolder,inputFilename,jeffrey)
       }
       catch {
         case e: Exception => {
@@ -206,7 +212,13 @@ class Preprocess @Inject()(db: Database)(val messagesApi: MessagesApi) extends C
   //--------------preprocess2
 
   def preprocess2 = Action { implicit request =>
-    var user = request.session.get("username").get;
+    //var user = request.session.get("username").get;
+    var jeffrey = ""
+    request.session.get("username").map { user =>
+      jeffrey = user
+    }.getOrElse {
+      jeffrey = "NULL"
+    }
     InputForms.csvPathIn.bindFromRequest.fold(
       formWithErrors => BadRequest("error"), { case (path) =>
 
@@ -215,8 +227,8 @@ class Preprocess @Inject()(db: Database)(val messagesApi: MessagesApi) extends C
         val SparkSession = SPARK.getSession()
         var jsonString =""
         try{
-          println("path::"+user)
-          val df = SparkSession.read.load(user+"/"+path)
+          println("path::"+jeffrey)
+          val df = SparkSession.read.load(jeffrey+"/"+path)
           jsonString = createJsonArray(df)
         } catch {
           case e: Exception => {
@@ -230,7 +242,7 @@ class Preprocess @Inject()(db: Database)(val messagesApi: MessagesApi) extends C
         }
 
 
-        Ok(html.preprocess.dataimport_pre2(InputForms.csvPathIn.fill(user+"/"+path), null,jsonString))
+        Ok(html.preprocess.dataimport_pre2(InputForms.csvPathIn.fill(jeffrey+"/"+path), null,jsonString))
       }
     )
   }
@@ -244,7 +256,13 @@ class Preprocess @Inject()(db: Database)(val messagesApi: MessagesApi) extends C
         val SPARK = new SparkConfCreator(Utilities.master,this.getClass.getSimpleName)
         val SparkSession = SPARK.getSession()
         val DB = new DatabaseCon(db)
-        val user = request.session.get("username").get
+        //val user = request.session.get("username").get
+        var jeffrey = ""
+        request.session.get("username").map { user =>
+          jeffrey = user
+        }.getOrElse {
+          jeffrey = "NULL"
+        }
 
         try{
           val df = SparkSession.read
@@ -257,7 +275,7 @@ class Preprocess @Inject()(db: Database)(val messagesApi: MessagesApi) extends C
           val df2 = assembler.transform(df).select("features")
           df2.write.parquet(outputFolder)
 
-          DB.insertPre2(outputFolder, inputFilename, true,user)
+          DB.insertPre2(outputFolder, inputFilename, true,jeffrey)
 
 
         } catch {
@@ -324,7 +342,13 @@ class Preprocess @Inject()(db: Database)(val messagesApi: MessagesApi) extends C
       var outputFolder = ""
       var labelColumn = ""
       var labelTag = true;
-      val user = request.session.get("username").get
+      //val user = request.session.get("username").get
+      var jeffrey = ""
+      request.session.get("username").map { user =>
+        jeffrey = user
+      }.getOrElse {
+        jeffrey = "NULL"
+      }
       //var convStringCol:List[String]=List()
       //var categoryCol:List[String]=List()
       //var dropCol:List[String]=List()
@@ -363,10 +387,10 @@ class Preprocess @Inject()(db: Database)(val messagesApi: MessagesApi) extends C
       }
       else transformed = transformed.withColumn("label", transformed(labelColumn).cast(DoubleType)).select("features", "label")
 
-      transformed.write.parquet(user+"/"+outputFolder)
+      transformed.write.parquet(jeffrey+"/"+outputFolder)
 
       //insert into sql
-      DB.insertPre2(outputFolder, inputFilename, labelTag,user)
+      DB.insertPre2(outputFolder, inputFilename, labelTag,jeffrey)
 
       SPARK.closeAll()
 

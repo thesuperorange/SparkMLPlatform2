@@ -1,7 +1,7 @@
 @import helper._
 
 @(param: Form[(String, String, String, String)], pre2data: List[String], regResult: logRegModel)(implicit messages: Messages)
-    @main(title = "Linear Regression") {
+    @main(title = "Logistic Regression") {
 
         @if(pre2data != null) {
             @form(action = routes.Classification.callLogistic()) {

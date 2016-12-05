@@ -15,21 +15,29 @@ import org.apache.spark.sql.functions.udf
 class Clustering @Inject()(val messagesApi: MessagesApi) extends Controller with I18nSupport {
 
   def callKmeans= Action { implicit request =>
-    var user = request.session.get("username").get
+    
     InputForms.KmeansParam.bindFromRequest.fold(
       formWithErrors => {
         println("ERROR" + formWithErrors)
         BadRequest("error in callKmeans")
       }, { case (inputFilename, k) =>
+	
+      var jeffrey = ""
+      request.session.get("username").map { user =>
+        jeffrey = user
+      }.getOrElse {
+        jeffrey = "NULL"
+      }
         val SPARK = new SparkConfCreator(Utilities.master,this.getClass.getSimpleName)
         val SparkSession = SPARK.getSession()
         val sc = SPARK.getSC()
-
+	
+        val df = SparkSession.read.load(jeffrey+"/"+inputFilename)
         var center: List[String] = List()
         var JsonStr = "{"
         try {
 
-          val df = SparkSession.read.load(user+"/"+inputFilename)
+         
 
           val kmeans = new KMeans().setK(k.toInt).setFeaturesCol("features").setPredictionCol("prediction")
 
@@ -66,7 +74,6 @@ class Clustering @Inject()(val messagesApi: MessagesApi) extends Controller with
           var str = ""
           for (i <- 0 to headerSize - 1) {
             str += "f" + i + ":[" + seqDF.select("f"+i).rdd.map(x=>x(0)).collect.mkString(",") + "],"
-            /*dddddddddddddddd*/
           }
           JsonStr += str.substring(0, str.length - 1) + "}"
 

@@ -17,7 +17,13 @@ import org.json4s.JsonDSL._
 class FeatureSelection @Inject()(val messagesApi: MessagesApi) extends Controller with I18nSupport {
 
   def callPCA = Action { implicit request =>
-    var user = request.session.get("username").get
+	var jeffrey = ""
+        request.session.get("username").map { user =>
+          jeffrey = user
+        }.getOrElse {
+          jeffrey = "NULL"
+        }
+    //var user = request.session.get("username").get
     InputForms.KmeansParam.bindFromRequest.fold(
       formWithErrors => {
         println("ERROR" + formWithErrors)
@@ -31,7 +37,7 @@ class FeatureSelection @Inject()(val messagesApi: MessagesApi) extends Controlle
         var json = org.json4s.jackson.renderJValue("")
 
         try {
-          val df = SparkSession.read.load(user+"/"+inputFilename)
+          val df = SparkSession.read.load(jeffrey+"/"+inputFilename)
 
           val pca = new PCA().setInputCol("features").setOutputCol("pcaFeatures").setK(k.toInt).fit(df)
           val pcaDF = pca.transform(df)

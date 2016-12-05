@@ -18,7 +18,8 @@ libraryDependencies ++= {
     "org.apache.spark" %% "spark-core" % sparkV,
     "org.apache.spark" %% "spark-mllib" % sparkV,
     "org.apache.spark" %% "spark-sql" % sparkV,
-    "org.apache.spark" %% "spark-graphx" % sparkV
+    "org.apache.spark" %% "spark-graphx" % sparkV,
+    "com.github.scala-incubator.io" %% "scala-io-file" % "0.4.3"
 
   )
 }

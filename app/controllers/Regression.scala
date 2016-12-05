@@ -16,6 +16,7 @@ import org.json4s.jackson.JsonMethods._
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, Controller}
 import views.html
+import org.apache.spark.ml.linalg.DenseVector
 
 /**
   * Created by superorange on 4/1/16.
@@ -24,13 +25,18 @@ class Regression @Inject()(val messagesApi: MessagesApi) extends Controller with
 
 
   def callRegression = Action { implicit request =>
-    var user = request.session.get("username").get
+    //var user = request.session.get("username").get
     InputForms.elasticInput.bindFromRequest.fold(
       formWithErrors => {
         println("ERROR" + formWithErrors)
         BadRequest("error in callRegression")
       }, { case (inputFilename, maxIter, regParam, elaParam) =>
-
+        var jeffrey = ""
+        request.session.get("username").map { user =>
+          jeffrey = user
+        }.getOrElse {
+          jeffrey = "NULL"
+        }
         var error=false
         val SPARK = new SparkConfCreator(Utilities.master,this.getClass.getSimpleName)
         val SparkSession = SPARK.getSession()
@@ -39,7 +45,7 @@ class Regression @Inject()(val messagesApi: MessagesApi) extends Controller with
         try {
 
 
-        val training = SparkSession.read.load(user+"/"+inputFilename)
+        val training = SparkSession.read.load(jeffrey+"/"+inputFilename)
         // val training = sqlContext.read.format("libsvm") .load(parquetName)
         //val lr = new LinearRegression().setLabelCol("label").setFeaturesCol("features")
         val lr = new LinearRegression().setMaxIter(maxIter.toInt).setRegParam(regParam.toDouble).setElasticNetParam(elaParam.toDouble)
@@ -51,7 +57,7 @@ class Regression @Inject()(val messagesApi: MessagesApi) extends Controller with
 
 
         val timestamp: Long = System.currentTimeMillis
-        lrModel.save(Utilities.modelFolder + "/" + Utilities.linearModel + "/" + timestamp)
+        lrModel.save(jeffrey + "/" + Utilities.linearModel + "/" + timestamp)
 
         val trainingSummary = lrModel.summary
 
@@ -129,16 +135,28 @@ class Regression @Inject()(val messagesApi: MessagesApi) extends Controller with
       formWithErrors => {
         println("ERROR" + formWithErrors)
         BadRequest("error in transformRegression")
-      }, { case (inputFilename, model) =>
+      }, {
+        case (inputFilename, model) =>
+
+          var jeffrey = ""
+          request.session.get("username").map { user =>
+            jeffrey = user
+          }.getOrElse {
+            jeffrey = "NULL"
+          }
         val SPARK = new SparkConfCreator(Utilities.master,this.getClass.getSimpleName)
         val SparkSession = SPARK.getSession()
 
         var result = ""
         try {
-          val df = SparkSession.read.load(inputFilename)
-          val lrmodel = LinearRegressionModel.load(Utilities.modelFolder + "/" + Utilities.linearModel + "/" + model)
+          println(jeffrey,inputFilename)
+          val df = SparkSession.read.load(jeffrey+"/"+inputFilename)
+          val lrmodel = LinearRegressionModel.load(jeffrey + "/" + Utilities.linearModel + "/" + model)
           val numModelFeatures = lrmodel.numFeatures
-          val numDfFeatures = df.select("features").first.getAs[Vector](0).size
+
+          val y = df.select("features").head
+          val numDfFeatures = y(0).asInstanceOf[DenseVector].size
+
           if (numModelFeatures == numDfFeatures) {
             val prediction = lrmodel.transform(df)
 
@@ -161,7 +179,7 @@ class Regression @Inject()(val messagesApi: MessagesApi) extends Controller with
         } finally {
           SPARK.closeAll()
         }
-
+        println(result)
         Ok(html.mlTrans.regression_transform(InputForms.ModelParam, null, null, result))
       })
 

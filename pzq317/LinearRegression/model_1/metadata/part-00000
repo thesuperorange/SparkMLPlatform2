@@ -1,0 +1,1 @@
+{"class":"org.apache.spark.ml.regression.LinearRegressionModel","timestamp":1480821242168,"sparkVersion":"2.0.0","uid":"linReg_6be45fddb31a","paramMap":{"tol":1.0E-6,"regParam":0.3,"elasticNetParam":0.8,"predictionCol":"prediction","featuresCol":"features","maxIter":10,"solver":"auto","labelCol":"label","standardization":true,"fitIntercept":true}}

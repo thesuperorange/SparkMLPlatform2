@@ -21,14 +21,19 @@ class Simple @Inject()(db: Database)(val messagesApi: MessagesApi) extends Contr
     InputForms.modelform.bindFromRequest.fold(
       formWithErrors => BadRequest("error"), {
         case (timestamp, modelType,outputFolder) =>
-
+          var jeffrey = ""
+          request.session.get("username").map { user =>
+            jeffrey = user
+          }.getOrElse {
+            jeffrey = "NULL"
+          }
 
           try {
             val DB = new DatabaseCon(db)
 
-            val dir = new File(modelFolder+"/"+modelType+"/"+timestamp);
-            val newName = new File(modelFolder+"/"+modelType+"/"+outputFolder);
-            println("rename from:" +modelFolder+"/"+modelType+"/"+timestamp+"  to: "+modelFolder+"/"+modelType+"/"+outputFolder)
+            val dir = new File(jeffrey+"/"+modelType+"/"+timestamp);
+            val newName = new File(jeffrey+"/"+modelType+"/"+outputFolder);
+            println("rename from:" +jeffrey+"/"+modelType+"/"+timestamp+"  to: "+jeffrey+"/"+modelType+"/"+outputFolder)
 
             if ( dir.isDirectory() ) {
               dir.renameTo(newName);
@@ -36,7 +41,7 @@ class Simple @Inject()(db: Database)(val messagesApi: MessagesApi) extends Contr
               dir.mkdir();
               dir.renameTo(newName);
             }
-            DB.insertModel(outputFolder,modelType)
+            DB.insertModel(outputFolder,modelType,jeffrey)
           }
           catch {
             case e: Exception => {

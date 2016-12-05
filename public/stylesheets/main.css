@@ -213,3 +213,6 @@ table.table-style-three td {
     border-color: #D9C8B0;
     background-color: #ffffff;
 }
+.info{
+    display: none;
+}

@@ -44,7 +44,7 @@ class DatabaseCon(db: Database) {
       val stmt = conn.createStatement
       val rs = stmt.executeQuery("SELECT * from " + tablename +" where id = "+"'"+user+"'" )
       if(rs.next()){
-        var secret = rs.getString("password")
+        var secret = rs.getString("pasword")
         var b = BCrypt.checkpw(password, secret)
         if(b){
           println("Welcome")
@@ -63,7 +63,24 @@ class DatabaseCon(db: Database) {
       conn.close()
     }
   }
+  def removeNULL()={
+    //------sql connect------
+    val conn = db.getConnection()
+    val tablename1 = Utilities.pre1Table
+    val tablename2 = Utilities.pre2Table
+    val tablename3 = Utilities.modelTable
 
+    try {
+      val stmt = conn.createStatement
+
+      stmt.executeUpdate("delete from " + tablename1 + " where users = 'NULL'" );
+      stmt.executeUpdate("delete from " + tablename2 + " where users = 'NULL'" );
+      stmt.executeUpdate("delete from " + tablename3 + " where users = 'NULL'" );
+
+    } finally {
+      conn.close()
+    }
+  }
   def insertPre1(outputPathName:String, fromPath: String,user:String)={
     //------sql connect------
     val conn = db.getConnection()
@@ -96,13 +113,14 @@ class DatabaseCon(db: Database) {
     }
 
   }
-  def getModelInfo(modelType: String): List[String] = {
+  def getModelInfo(user:String,modelType: String): List[String] = {
     val tablename = Utilities.modelTable
     val conn = db.getConnection()
     var dbname = List[String]()
     try {
       val stmt = conn.createStatement
-      val rs = stmt.executeQuery("SELECT * from " + tablename + " where type='" + modelType+"'")
+      //println("SELECT * from " + tablename + " where type='" + modelType+"'"+"AND where users = '" +user+"'")
+      val rs = stmt.executeQuery("SELECT * from " + tablename + " where type='" + modelType+"'"+"AND users = '" +user+"'")
       while (rs.next()) {
         dbname = rs.getString("name") :: dbname
       }
@@ -137,7 +155,8 @@ class DatabaseCon(db: Database) {
       val stmt = conn.createStatement
       println(users)
       if(users =="NULL") {
-        val rs = stmt.executeQuery("SELECT * from " + tablename + " where users IS NULL" )
+        println("NULLLLLLLLLLL")
+        val rs = stmt.executeQuery("SELECT * from " + tablename + " where users='" + users + "'" )
         while (rs.next()) {
           dbname = rs.getString("name") :: dbname
         }
@@ -164,7 +183,7 @@ class DatabaseCon(db: Database) {
     var dbname = List[String]()
     try {
       val stmt = conn.createStatement
-      println("SELECT * from " + tablename +"where users = "+user)
+      println("SELECT * from " + tablename +" where users = "+user)
       val rs = stmt.executeQuery("SELECT * from " + tablename +" where users = "+"'"+user+"'" )
       while (rs.next()) {
         dbname = rs.getString("name") :: dbname
@@ -174,14 +193,14 @@ class DatabaseCon(db: Database) {
     }
     return dbname
   }
-  def insertModel(outputPathName:String, modelType: String)={
+  def insertModel(outputPathName:String, modelType: String, user:String)={
     //------sql connect------
     val conn = db.getConnection()
     val tablename = "Model"
-
+    println(outputPathName,modelType)
     try {
       val stmt = conn.createStatement
-      stmt.executeUpdate("INSERT INTO " + tablename + " VALUES ('" + outputPathName + "','" + modelType + "')");
+      stmt.executeUpdate("INSERT INTO " + tablename + " VALUES ('" + outputPathName + "','" + modelType +"','"+ user +"')");
 
     } finally {
       conn.close()

@@ -11,7 +11,9 @@ import views.html
 import controllers.util.{DatabaseCon, InputForms, Utilities}
 
 import scala.text
-
+import java.net.URL
+import scalax.io.JavaConverters._
+import scalax.file.Path
 
 /**
   * Created by superorange on 4/1/16.
@@ -23,10 +25,10 @@ class Entrance @Inject()(db: Database)(val messagesApi: MessagesApi) extends Con
   def reg_trans = Action {request =>
     request.session.get("username").map { user =>
       val DB = new DatabaseCon(db)
-      Ok(html.mlTrans.regression_transform(InputForms.ModelParam, DB.getPre2Info(user), DB.getModelInfo(Utilities.linearModel), null))
+      Ok(html.mlTrans.regression_transform(InputForms.ModelParam, DB.getPre2Info(user), DB.getModelInfo(user,Utilities.linearModel), null))
     }.getOrElse{
       val DB = new DatabaseCon(db)
-      Ok(html.mlTrans.regression_transform(InputForms.ModelParam, DB.getPre2Info("NULL"), DB.getModelInfo(Utilities.linearModel), null))
+      Ok(html.mlTrans.regression_transform(InputForms.ModelParam, DB.getPre2Info("NULL"), DB.getModelInfo("NULL",Utilities.linearModel), null))
     }
   }
   //--------------regression training---------------
@@ -57,13 +59,28 @@ class Entrance @Inject()(db: Database)(val messagesApi: MessagesApi) extends Con
   }
 
   //-------index
-  def index = Action { request=>
+  def index = Action { request =>
     request.session.get("username").map { user =>
+      delete
+      val DB = new DatabaseCon(db)
+      DB.removeNULL
       Ok(html.index(user.toString))
     }.getOrElse {
+      delete
+      val DB = new DatabaseCon(db)
+      DB.removeNULL
       Ok(html.index("outsider"))
     }
+
+    //delete("/home/pzq317/Desktop/SparkMLPlatform2/NULL/pre2")
   }
+    def delete{
+      //val path: Path = Path ("/home/pzq317/Desktop/SparkMLPlatform2/NULL")
+      val path = Path.fromString("/home/pzq317/Desktop/SparkMLPlatform2/NULL")
+      path.deleteRecursively()
+      //path.deleteIfExists()
+  }
+
 
   //-------------------Data Import-------------
 
@@ -97,7 +114,9 @@ class Entrance @Inject()(db: Database)(val messagesApi: MessagesApi) extends Con
       val DB = new DatabaseCon(db)
       Ok(html.mlModel.linearRegression(InputForms.elasticInput, DB.getPre2Info(user), null))
     }.getOrElse {
+      //println(DB.getPre2Info("NULL"))
       val DB = new DatabaseCon(db)
+      println(DB.getPre2Info("NULL"))
       Ok(html.mlModel.linearRegression(InputForms.elasticInput, DB.getPre2Info("NULL"), null))
     }
 

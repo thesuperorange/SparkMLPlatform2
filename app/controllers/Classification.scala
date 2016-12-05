@@ -33,6 +33,7 @@ class Classification  @Inject()(val messagesApi: MessagesApi) extends Controller
         var x = logRegModel(null, 0, 0, 0, 0, 0, 0, "", "", "", "", "", "")
 
         try {
+          println(inputFilename, maxIter, regParam, elaParam)
 
           val df = SparkSession.read.load(jeffrey+"/"+inputFilename)
           val lr = new LogisticRegression().setMaxIter(maxIter.toInt).setRegParam(regParam.toDouble).setElasticNetParam(elaParam.toDouble).setLabelCol("label").setFeaturesCol("features")
