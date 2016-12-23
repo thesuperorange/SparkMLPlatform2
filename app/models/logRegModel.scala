@@ -17,6 +17,7 @@ case class logRegModel(
                         precisionJson:String,
                         recallJson:String,
                         fmeasureJson:String,
-                        threshold:String
+                        threshold:String,
+                        timestamp:Long
                       )
 

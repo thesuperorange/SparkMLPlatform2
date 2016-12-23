@@ -49,7 +49,7 @@ class Simple @Inject()(db: Database)(val messagesApi: MessagesApi) extends Contr
 
             }
           }
-          Ok(html.showtext("save to "+outputFolder+" successfully")) }
+          Ok(html.showtext("save to "+outputFolder+" successfully",jeffrey)) }
     )
 
   }

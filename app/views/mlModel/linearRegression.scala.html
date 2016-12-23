@@ -1,7 +1,7 @@
 @import helper._
 @import util.Utilities
-@(param: Form[(String, String, String, String)], pre2data: List[String], regResult: RegressionModel)(implicit messages: Messages)
-@main(title = "Linear Regression") {
+@(param: Form[(String, String, String, String)], pre2data: List[String], regResult: RegressionModel,user:String)(implicit messages: Messages)
+@main(title = "Linear Regression",test = user) {
   <script src='@routes.Assets.at("javascripts/d3/scatter.js")'></script>
 
   <script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
@@ -35,16 +35,17 @@
         args = '_label -> "Regression -- csv path", 'placeholder -> "inputpath"
         )**@
         @inputText(
-
-          field = param("maxIter"),
-          args = '_label -> "MaxIter", 'value -> "10"
+        //param("maxIter").copy(value=Some("10")),
+          field = param("maxIter").copy(value = Some("10")),
+          args = '_label -> "MaxIter",  'placeholder -> "10",'value -> "10"
         )
         @inputText(
-          field = param("regParam"),
+          field = param("regParam").copy(value = Some("0.3")),
+
           args = '_label -> "Reg Param", 'placeholder -> "0.3", 'value -> "0.3"
         )
         @inputText(
-          field = param("elaParam"),
+          field = param("elaParam").copy(value = Some("0.8")),
           args = '_label -> "Elastic Param", 'placeholder -> "0.8", 'value -> "0.8"
         )
 
@@ -156,17 +157,17 @@
 
 
     <br>
-    @regResult.pValues
+    pvalues = @regResult.pValues
     <br>
-    @regResult.coefficientStandardErrors
+    coefficientStandardErrors = @regResult.coefficientStandardErrors
     <br>
-    @regResult.meanSquaredError
+    meanSquaredError = @regResult.meanSquaredError
     <br>
-    @regResult.totalIter
+    totalIter = @regResult.totalIter
     <br>
 
 
-
+  @if(user!="NULL"){
     @form(action = routes.Simple.saveModel) {
 
       <input type="text" name="outputFolder" value="temp"> <br>
@@ -177,6 +178,6 @@
         <input type="submit" id="submit">
       </p>
     }
-
+  }
   }
 }

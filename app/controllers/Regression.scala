@@ -17,7 +17,8 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, Controller}
 import views.html
 import org.apache.spark.ml.linalg.DenseVector
-
+import scalax.io.JavaConverters._
+import scalax.file.Path
 /**
   * Created by superorange on 4/1/16.
   */
@@ -118,10 +119,10 @@ class Regression @Inject()(val messagesApi: MessagesApi) extends Controller with
         }
 
         if(error){
-        Ok(html.showtext("error in Linear Regression"))}
+        Ok(html.showtext("error in Linear Regression",jeffrey))}
         else {
 
-          Ok(html.mlModel.linearRegression(InputForms.elasticInput, null, x))
+          Ok(html.mlModel.linearRegression(InputForms.elasticInput, null, x,jeffrey))
 
         }
       }
@@ -148,6 +149,7 @@ class Regression @Inject()(val messagesApi: MessagesApi) extends Controller with
         val SparkSession = SPARK.getSession()
 
         var result = ""
+        var res = Array[String]()
         try {
           println(jeffrey,inputFilename)
           val df = SparkSession.read.load(jeffrey+"/"+inputFilename)
@@ -163,7 +165,14 @@ class Regression @Inject()(val messagesApi: MessagesApi) extends Controller with
 
             import SparkSession.implicits._
             //temp  send mean back
-            result = prediction.select(mean($"prediction")).first.toString
+            prediction.show
+            delete
+            df.write.format("com.databricks.spark.csv").option("header",true).option("inferSchema", "true").csv("/home/pzq317/Desktop/test")
+
+
+            //result = prediction.select(mean($"prediction")).first.toString
+            res = prediction.select("prediction").rdd.map(r=>r(0).toString).collect
+
           }
           else {
             result = "[Error] feature number is not consistent"
@@ -180,9 +189,53 @@ class Regression @Inject()(val messagesApi: MessagesApi) extends Controller with
           SPARK.closeAll()
         }
         println(result)
-        Ok(html.mlTrans.regression_transform(InputForms.ModelParam, null, null, result))
-      })
+        if(result=="") {
+          Ok(html.mlTrans.regression_transform(InputForms.ModelParam,InputForms.download, null, null, res,null,jeffrey))
+        }
+          else{
+          Ok(html.mlTrans.regression_transform(InputForms.ModelParam, null, null, null, null,result,jeffrey))
+        }
+        })
 
   }
+  def download = Action{implicit request =>
+      InputForms.download.bindFromRequest.fold(
+        formWithErrors => {
+          println("ERROR" + formWithErrors)
+          BadRequest("error in download")
+        }, {
+          case (csvPath) =>
+            var jeffrey = ""
+            request.session.get("username").map { user =>
+              jeffrey = user
+            }.getOrElse {
+              jeffrey = "NULL"
+            }
+            val SPARK = new SparkConfCreator(Utilities.master,this.getClass.getSimpleName)
+            val SparkSession = SPARK.getSession()
 
+            try {
+              val prediction = SparkSession.read.csv("/home/pzq317/Desktop/test")
+              prediction.write.format("com.databricks.spark.csv").option("header",true).option("inferSchema", "true").csv(csvPath)
+
+
+            }
+            catch {
+              case e: Exception => {
+                println("error in meanSquaredError:" + e)
+                SPARK.closeAll()
+              }
+            } finally {
+              SPARK.closeAll()
+            }
+              Ok("file downloaded")
+
+        })
+  }
+  def delete {
+    //val path: Path = Path ("/home/pzq317/Desktop/SparkMLPlatform2/NULL")
+    val path = Path.fromString("/home/pzq317/Desktop/test")
+    path.deleteRecursively()
+    //path.deleteIfExists()
+  }
 }

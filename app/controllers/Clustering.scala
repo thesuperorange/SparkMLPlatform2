@@ -2,13 +2,17 @@ package controllers
 
 import javax.inject.Inject
 
-import controllers.util.{Utilities, SparkConfCreator, InputForms}
+import controllers.util.{InputForms, SparkConfCreator, Utilities}
 import org.apache.spark.ml.clustering.KMeans
-import org.apache.spark.ml.linalg.Vector
+import org.apache.spark.ml.clustering.KMeansModel
+import org.apache.spark.ml.linalg.{DenseVector, Vector}
+import org.apache.spark.ml.regression.LinearRegressionModel
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, Controller}
 import views.html
 import org.apache.spark.sql.functions.udf
+import scalax.io.JavaConverters._
+import scalax.file.Path
 /**
   * Created by superorange on 9/19/16.
   */
@@ -43,6 +47,8 @@ class Clustering @Inject()(val messagesApi: MessagesApi) extends Controller with
 
           val model = kmeans.fit(df)
 
+          val timestamp: Long = System.currentTimeMillis
+          model.save(jeffrey + "/" + Utilities.kmeansModel + "/" + "NULL")
           // Shows the result
           println("Final Centers: ")
           model.clusterCenters.foreach(x => center = x.toString :: center)
@@ -87,9 +93,102 @@ class Clustering @Inject()(val messagesApi: MessagesApi) extends Controller with
           sc.stop()
         }
 
-        Ok(html.mlModel.kmeans(InputForms.KmeansParam, null, center, JsonStr))
+        Ok(html.mlModel.kmeans(InputForms.KmeansParam, null, center, JsonStr,jeffrey))
       }
 
     )
   }
+  def  kmean_trans = Action { implicit request =>
+    InputForms.ModelParam.bindFromRequest.fold(
+      formWithErrors => {
+        println("ERROR" + formWithErrors)
+        BadRequest("error in kmeans")
+      }, {
+        case (inputFilename, model) =>
+
+          var jeffrey = ""
+          request.session.get("username").map { user =>
+            jeffrey = user
+          }.getOrElse {
+            jeffrey = "NULL"
+          }
+          val SPARK = new SparkConfCreator(Utilities.master,this.getClass.getSimpleName)
+          val SparkSession = SPARK.getSession()
+
+          var result = ""
+          var res = Array[String]()
+          try {
+            println(jeffrey,inputFilename, model)
+            val df = SparkSession.read.load(jeffrey+"/"+inputFilename)
+
+            val kmeans = KMeansModel.load(jeffrey + "/" + Utilities.kmeansModel + "/" + model)
+            //val ans = kmeans.fit(df)
+
+            println(kmeans.getFeaturesCol)
+            val prediction = kmeans.transform(df)
+            prediction.show
+            res = prediction.select("prediction").rdd.map(r=>r(0).toString).collect
+
+            delete
+            prediction.write.format("com.databricks.spark.csv").option("header",true).option("inferSchema", "true").csv("/home/pzq317/Desktop/test")
+
+          }
+          catch {
+            case e: Exception => {
+              println("error in meanSquaredError:" + e)
+              SPARK.closeAll()
+            }
+          } finally {
+            SPARK.closeAll()
+          }
+          println(result)
+          if(result=="") {
+            Ok(html.mlTrans.kmeans(InputForms.ModelParam,InputForms.download, null, null, res,null,jeffrey))
+          }
+          else{
+            Ok(html.mlTrans.kmeans(InputForms.ModelParam, null, null, null, null,result,jeffrey))
+          }
+      })
+  }
+  def download = Action{implicit request =>
+    InputForms.download.bindFromRequest.fold(
+      formWithErrors => {
+        println("ERROR" + formWithErrors)
+        BadRequest("error in download")
+      }, {
+        case (csvPath) =>
+          var jeffrey = ""
+          request.session.get("username").map { user =>
+            jeffrey = user
+          }.getOrElse {
+            jeffrey = "NULL"
+          }
+          val SPARK = new SparkConfCreator(Utilities.master,this.getClass.getSimpleName)
+          val SparkSession = SPARK.getSession()
+
+          try {
+            val prediction = SparkSession.read.csv("/home/pzq317/Desktop/test")
+            prediction.write.format("com.databricks.spark.csv").option("header",true).option("inferSchema", "true").csv(csvPath)
+
+
+          }
+          catch {
+            case e: Exception => {
+              println("error in meanSquaredError:" + e)
+              SPARK.closeAll()
+            }
+          } finally {
+            SPARK.closeAll()
+          }
+          Ok("file downloaded")
+
+      })
+  }
+  def delete {
+    //val path: Path = Path ("/home/pzq317/Desktop/SparkMLPlatform2/NULL")
+    val path = Path.fromString("/home/pzq317/Desktop/test")
+    path.deleteRecursively()
+    //path.deleteIfExists()
+  }
+
 }

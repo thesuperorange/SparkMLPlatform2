@@ -32,7 +32,12 @@ class RegressionSimple @Inject()(val messagesApi: MessagesApi) extends Controlle
         println("ERROR" + formWithErrors)
         BadRequest("error in callRegression")
       }, { case (inputFilename, maxIter, regParam, elaParam) =>
-
+        var jeffrey = ""
+        request.session.get("username").map { user =>
+          jeffrey = user
+        }.getOrElse {
+          jeffrey = "NULL"
+        }
 
         val SPARK = new SparkConfCreator(Utilities.master,this.getClass.getSimpleName)
         val SparkSession = SPARK.getSession()
@@ -115,7 +120,7 @@ class RegressionSimple @Inject()(val messagesApi: MessagesApi) extends Controlle
 
         SPARK.closeAll()
         var user = request.session.get("username").get
-        Ok(html.lrsimple(InputForms.elasticInput,boxJson))
+        Ok(html.lrsimple(InputForms.elasticInput,boxJson,jeffrey))
 
 
       }

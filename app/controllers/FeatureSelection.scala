@@ -2,15 +2,17 @@ package controllers
 
 import javax.inject.Inject
 
-import controllers.util.{Utilities, SparkConfCreator, InputForms}
+import controllers.util.{InputForms, SparkConfCreator, Utilities}
 import org.apache.spark.ml.feature.PCA
-import org.apache.spark.ml.linalg.Vector
+import org.apache.spark.ml.feature.PCAModel
+import org.apache.spark.ml.linalg.{DenseVector, Vector}
 import org.json4s.jackson.JsonMethods._
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, Controller}
 import views.html
-
 import org.json4s.JsonDSL._
+import scalax.io.JavaConverters._
+import scalax.file.Path
 /**
   * Created by superorange on 9/20/16.
   */
@@ -42,6 +44,8 @@ class FeatureSelection @Inject()(val messagesApi: MessagesApi) extends Controlle
           val pca = new PCA().setInputCol("features").setOutputCol("pcaFeatures").setK(k.toInt).fit(df)
           val pcaDF = pca.transform(df)
 
+          val timestamp: Long = System.currentTimeMillis
+          pca.save(jeffrey + "/" + Utilities.pcaModel + "/" + "NULL")
           //------
           val b = pcaDF.select("pcaFeatures").rdd.map { x => x.getAs[Vector](0) }
 
@@ -81,9 +85,108 @@ class FeatureSelection @Inject()(val messagesApi: MessagesApi) extends Controlle
         }
 
 
-        Ok(html.mlModel.pca(InputForms.KmeansParam, null, pretty(json)))
+        Ok(html.mlModel.pca(InputForms.KmeansParam, null, pretty(json),jeffrey))
       }
 
     )
   }
+  def pca_trans = Action{
+    implicit request =>
+      InputForms.ModelParam.bindFromRequest.fold(
+        formWithErrors => {
+          println("ERROR" + formWithErrors)
+          BadRequest("error in pcatransformation")
+        }, {
+          case (inputFilename, model) =>
+
+            var jeffrey = ""
+            request.session.get("username").map { user =>
+              jeffrey = user
+            }.getOrElse {
+              jeffrey = "NULL"
+            }
+            val SPARK = new SparkConfCreator(Utilities.master,this.getClass.getSimpleName)
+            val SparkSession = SPARK.getSession()
+
+            var result = ""
+            var res = Array[String]()
+            try {
+              println(jeffrey,inputFilename)
+              val df = SparkSession.read.load(jeffrey+"/"+inputFilename)
+              val pca = PCAModel.load(jeffrey + "/" + Utilities.pcaModel + "/" + model)
+              val numFeatures= pca.pc.numRows
+              val y = df.select("features").head
+              val numDfFeatures = y(0).asInstanceOf[DenseVector].size
+              println(numFeatures)
+
+              if (numFeatures == numDfFeatures) {
+                val prediction = pca.transform(df)
+                prediction.show
+                res = prediction.select("pcaFeatures").rdd.map(r => r(0).toString).collect
+
+                delete
+                prediction.write.format("com.databricks.spark.csv").option("header", true).option("inferSchema", "true").csv("/home/pzq317/Desktop/test")
+              }
+              else {
+                result = "[Error] feature number is not consistent"
+              }
+            }
+            catch {
+              case e: Exception => {
+                println("error in meanSquaredError:" + e)
+                SPARK.closeAll()
+              }
+            } finally {
+              SPARK.closeAll()
+            }
+            println(result)
+            if(result=="") {
+              Ok(html.mlTrans.pca(InputForms.ModelParam,InputForms.download, null, null, res,null,jeffrey))
+            }
+            else{
+              Ok(html.mlTrans.pca(InputForms.ModelParam, null, null, null, null,result,jeffrey))
+            }
+        })
+  }
+  def download = Action{implicit request =>
+    InputForms.download.bindFromRequest.fold(
+      formWithErrors => {
+        println("ERROR" + formWithErrors)
+        BadRequest("error in download")
+      }, {
+        case (csvPath) =>
+          var jeffrey = ""
+          request.session.get("username").map { user =>
+            jeffrey = user
+          }.getOrElse {
+            jeffrey = "NULL"
+          }
+          val SPARK = new SparkConfCreator(Utilities.master,this.getClass.getSimpleName)
+          val SparkSession = SPARK.getSession()
+
+          try {
+            val prediction = SparkSession.read.csv("/home/pzq317/Desktop/test")
+            prediction.write.format("com.databricks.spark.csv").option("header",true).option("inferSchema", "true").csv(csvPath)
+
+
+          }
+          catch {
+            case e: Exception => {
+              println("error in meanSquaredError:" + e)
+              SPARK.closeAll()
+            }
+          } finally {
+            SPARK.closeAll()
+          }
+          Ok("file downloaded")
+
+      })
+  }
+  def delete {
+    //val path: Path = Path ("/home/pzq317/Desktop/SparkMLPlatform2/NULL")
+    val path = Path.fromString("/home/pzq317/Desktop/test")
+    path.deleteRecursively()
+    //path.deleteIfExists()
+  }
+
 }

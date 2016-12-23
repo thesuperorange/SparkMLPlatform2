@@ -26,7 +26,7 @@ GET     /linearRegression_param2          controllers.Entrance.simp_reg
 
 GET     /linearRegression_param           controllers.Entrance.linear_reg_param
 POST    /linearRegression                   controllers.Regression.callRegression
-
+POST    /download              controllers.Regression.download
 
 GET     /regModel               controllers.Entrance.reg_trans
 POST    /regTrans               controllers.Regression.transformRegression
@@ -34,11 +34,18 @@ POST    /regTrans               controllers.Regression.transformRegression
 GET     /logregparam             controllers.Entrance.log_reg
 POST    /logisticRegression      controllers.Classification.callLogistic
 
+GET     /logModel               controllers.Entrance.log_trans
+POST    /logTrans               controllers.Classification.logRegression
+
 GET     /pca                    controllers.Entrance.pca
 POST    /pcaResult              controllers.FeatureSelection.callPCA
+GET     /pcaModel               controllers.Entrance.pca_trans
+POST    /pcaTrans               controllers.FeatureSelection.pca_trans
 
 GET     /kmeans                 controllers.Entrance.kmeans
 POST    /kmeansResult           controllers.Clustering.callKmeans
+GET     /kmeanModel             controllers.Entrance.kmean_trans
+POST    /kmeanTrans             controllers.Clustering.kmean_trans
 
 #GET     /decisionTree           controllers.Basic.decisionTree
 #POST     /dtResult              controllers.Classification.callDecisionTree_new

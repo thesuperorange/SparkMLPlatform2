@@ -1,6 +1,6 @@
 @import helper._
-@(param: Form[(String, String, String, String)], regResult: String)(implicit messages: Messages)
-@main(title = "Linear Regression") {
+@(param: Form[(String, String, String, String)], regResult: String,user:String)(implicit messages: Messages)
+@main(title = "Linear Regression",test = user) {
 
 
 @if(regResult == null) {

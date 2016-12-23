@@ -1,7 +1,7 @@
 @import helper._
 
-@(csvInput: Form[(String)], pre2data: List[String],jsonString: String)(implicit messages: Messages)
-    @main(title = "Linear Regression") {
+@(csvInput: Form[(String)], pre2data: List[String],jsonString: String,user:String)(implicit messages: Messages)
+    @main(title = "Linear Regression",test = user) {
 
 
         <h3>Data Preprocess 2</h3>
@@ -119,23 +119,24 @@
 
 
                     form.appendChild(document.createElement("br"));
-                    form.appendChild(document.createTextNode("Output name"));
-                    var outputPath = document.createElement("input");
-                    outputPath.type='text'
-                    outputPath.name = 'outputFolder'
-                    form.appendChild(outputPath);
-
+                    @if(user!="NULL"&&user!="outsider"&&user!="") {
+                        form.appendChild(document.createTextNode("Output name"));
+                        var outputPath = document.createElement("input");
+                        outputPath.type='text'
+                        outputPath.name = 'outputFolder'
+                        form.appendChild(outputPath);
+                    }
                     form.appendChild(document.createElement("br"));
                     form.appendChild(document.createElement("br"));
 
 
-
-                    var button = document.createElement("input");
-                    button.type='submit'
-                    button.id='saveto'
-                    button.value='save'
-                    form.appendChild(button);
-
+                    @if(user!="NULL"&&user!="outsider"&&user!="") {
+                        var button = document.createElement("input");
+                        button.type='submit'
+                        button.id='saveto'
+                        button.value='save'
+                        form.appendChild(button);
+                    }
 
 
 

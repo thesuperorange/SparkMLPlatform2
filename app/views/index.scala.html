@@ -1,9 +1,9 @@
 @import play.api.mvc.Session
 
-@(string:String)
-<div align="right">Welcome @string </div>
+@(user:String)
+<div align="right">Welcome @user </div>
 
-    @main(title = "User Guide") {
+    @main(title = "User Guide",test = user){
     <br>
     <a href = "#step1">Step 1: Import Data from HDFS</a>
     <br>

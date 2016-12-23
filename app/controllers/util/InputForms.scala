@@ -9,6 +9,9 @@ import play.api.data.Forms._
   * Created by superorange on 9/6/16.
   */
 object InputForms {
+  val download= Form(
+      "csvPath" -> nonEmptyText
+  )
   val SignIn= Form(
     tuple(
       "username" -> text,
@@ -39,6 +42,9 @@ object InputForms {
       "maxIter" -> text,
       "regParam" -> text,
       "elaParam" -> text
+      /*"maxIter" -> default(text, "10"),
+      "regParam" -> default(text,"0.3"),
+      "elaParam" -> default(text, "0.8")*/
 
     )
   )

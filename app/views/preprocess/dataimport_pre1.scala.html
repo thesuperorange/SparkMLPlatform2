@@ -1,8 +1,8 @@
 @import helper._
 
-@(csvInput: Form[(String,Boolean)],header:String,datatype: Seq[(String, String)], summary: Form[StatSummary],corMatrix:String)(implicit messages: Messages)
+@(csvInput: Form[(String,Boolean)],header:String,datatype: Seq[(String, String)], summary: Form[StatSummary],corMatrix:String,user:String)(implicit messages: Messages)
 
-@main(title = "Input Radio Group Sample") {
+@main(title = "Input Radio Group Sample",test = user) {
 
     <h3>Data Preprocess 1</h3>
 

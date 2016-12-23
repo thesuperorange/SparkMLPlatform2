@@ -1,11 +1,11 @@
 @import play.api.mvc.Session
 @import play.mvc.Http.Session
-@(title: String)(content: Html)
+@(title: String,test:String)(content: Html)
 
 
 <html>
     <head>
-        <title>@title</title>
+        <title>@title  </title>
 
         <script src="http://d3js.org/d3.v3.min.js"></script>
         <script type='text/javascript' src='http://code.jquery.com/jquery-1.7.1.min.js'></script>
@@ -46,19 +46,28 @@
 
                 <ul >
                     <li> <a href="@routes.Entrance.index()">Home</a> </li>
-                    <li><a href="#">Simple</a>
-                        <ul>
+                    @if(test!="NULL"&&test!="outsider"&&test!="") {
+                        <li><a href="#">Simple</a>
+                            <ul>
 
-                            <li>  <a href="@routes.Entrance.dataimport_pre1">DataImport Pre1 </a></li>
-                            <li><a href="@routes.Entrance.dataimport_pre2">DataImport Pre2 </a></li>
-                            <li><a href="@routes.Entrance.dataimport_nov">DataImport Direct </a></li>
+                                <li>  <a href="@routes.Entrance.dataimport_pre1">DataImport Pre1 </a></li>
+                                <li><a href="@routes.Entrance.dataimport_pre2">DataImport Pre2 </a></li>
+                                <li><a href="@routes.Entrance.dataimport_nov">DataImport Direct </a></li>
 
-                        </ul>
-                    </li>
+                            </ul>
+                        </li>
+                    }else{
+                        <li><a href="#">Simple</a>
+                            <ul>
+                                <li><a href="@routes.Entrance.dataimport_pre2">DataImport Pre2 </a></li>
+                            </ul>
+                        </li>
+                    }
+
                     <li><a href="#">Train Model</a>
                         <ul >
                             <li><a href="@routes.Entrance.linear_reg_param()">LinearRegression</a></li>
-                         <!--   <li><a href="@routes.Entrance.simp_reg()">test</a></li>-->
+                         <!--   <li><a href="routes.Entrance.simp_reg()">test</a></li>-->
 
                             <li><a href="@routes.Entrance.log_reg()">LogisticRegression</a></li>
                             <li><a href="@routes.Entrance.kmeans()">Kmeans</a></li>
@@ -70,9 +79,9 @@
                     <li><a href="#" >Machine Learning </a>
                         <ul >
                             <li><a href="@routes.Entrance.reg_trans()">LinearRegression</a></li>
-                            <li><a href="#">LogisticRegression</a></li>
-                            <li><a href="#">Kmeans</a></li>
-                            <li><a href="#">PCA</a></li>
+                            <li><a href="@routes.Entrance.log_trans()">LogisticRegression</a></li>
+                            <li><a href="@routes.Entrance.kmean_trans()">Kmeans</a></li>
+                            <li><a href="@routes.Entrance.pca_trans()">PCA</a></li>
                         </ul>
                     </li>
 

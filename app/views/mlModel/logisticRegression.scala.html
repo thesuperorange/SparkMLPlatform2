@@ -1,7 +1,7 @@
 @import helper._
-
-@(param: Form[(String, String, String, String)], pre2data: List[String], regResult: logRegModel)(implicit messages: Messages)
-    @main(title = "Logistic Regression") {
+@import util.Utilities
+@(param: Form[(String, String, String, String)], pre2data: List[String], regResult: logRegModel,user:String)(implicit messages: Messages)
+    @main(title = "Logistic Regression",test = user) {
 
         @if(pre2data != null) {
             @form(action = routes.Classification.callLogistic()) {
@@ -22,15 +22,15 @@
                     args = '_label -> "Regression -- csv path", 'placeholder -> "inputpath"
                     )**@
                     @inputText(
-                        field = param("maxIter"),
+                        field = param("maxIter").copy(value = Some("10")),
                         args = '_label -> "MaxIter", 'placeholder -> "10", 'value -> "10"
                     )
                     @inputText(
-                        field = param("regParam"),
+                        field = param("regParam").copy(value = Some("0.3")),
                         args = '_label -> "Reg Param", 'placeholder -> "0.3", 'value -> "0.3"
                     )
                     @inputText(
-                        field = param("elaParam"),
+                        field = param("elaParam").copy(value = Some("0.8")),
                         args = '_label -> "Elastic Param", 'placeholder -> "0.8", 'value -> "0.8"
                     )
                     <div class="submit">
@@ -127,11 +127,21 @@
 
 
             </script>
-            @regResult.coefficients
+            coefficients = @regResult.coefficients
             <br>
-            @regResult.intercept
+            intercept = @regResult.intercept
+            @if(user!="NULL"){
+                @form(action = routes.Simple.saveModel) {
 
+                    <input type="text" name="outputFolder" value="temp"> <br>
+                    <input type="hidden" name ="timestamp" value="@regResult.timestamp" ><br>
+                    <input type="hidden" name = "type" value="@Utilities.logisticModel" ><br>
 
+                    <p class="buttons">
+                    <input type="submit" id="submit">
+                    </p>
+                }
 
+            }
         }
     }

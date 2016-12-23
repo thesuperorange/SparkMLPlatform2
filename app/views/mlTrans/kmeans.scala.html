@@ -1,0 +1,58 @@
+@import helper._
+
+@(param: Form[(String, String)],down: Form[(String)], pre2data: List[String], model: List[String], regResult: Array[String], errorMessage: String,user:String)(implicit messages: Messages)
+@main(title = "Linear Regression", test = user) {
+
+  @if(pre2data != null) {
+    <h3>Kmeans</h3>
+    @form(action = routes.Clustering.kmean_trans()) {
+      <fieldset>
+
+        <legend>Input Parameters</legend>
+
+
+        @select(
+          field = param("inputpath"),
+          options(pre2data),
+          '_label -> "Select your parquet name")
+
+        @select(
+          field = param("model"),
+          options(model),
+          '_label -> "Select your model name")
+
+        <div class="submit">
+          <input type="submit" id="submit" value="submit">
+        </div>
+      </fieldset>
+
+    }
+  }
+
+  @if(regResult != null) {
+    <h2>predict labels</h2>
+    @for(i <- 0 to 3) {
+      <br>
+      Column@i| @regResult(i)
+    }
+    <br>
+    ....and @(regResult.length-4) more
+    <br>
+      @if(user!="NULL"&&user!="outsider"&&user!="") {
+        @form(action = routes.Regression.download()) {
+        <fieldset>
+            <legend>download your result</legend>
+            @inputText(
+                field = down("csvPath"),
+                '_label -> "Input your download path"
+            )
+
+            <div class="submit">
+            <input type="submit" id="submit" value="download">
+            </div>
+        </fieldset>
+
+        }
+      }
+  }
+}

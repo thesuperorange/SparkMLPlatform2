@@ -1,8 +1,8 @@
 @import helper._
 
-@(csvInput: Form[(String,Boolean,String)])(implicit messages: Messages)
+@(csvInput: Form[(String,Boolean,String)],user:String)(implicit messages: Messages)
 
-    @main(title = "ImportData without Visulization") {
+    @main(title = "ImportData without Visulization",test = user) {
 
         <h3>Data Preprocess Directly</h3>
 

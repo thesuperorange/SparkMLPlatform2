@@ -1,6 +1,6 @@
-@(result: String)(implicit messages: Messages)
+@(result:String,user:String)(implicit messages: Messages)
 
-@main(title = "Message ") {
+@main(title = "Message ", test = user) {
 
   @result
 }

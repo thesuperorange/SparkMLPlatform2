@@ -13,6 +13,7 @@ object Utilities {
   val linearModel = "LinearRegression"
   val logisticModel = "LogisticRegression"
   val kmeansModel = "Kmeans"
+  val pcaModel = "pcaModel"
   val decisionTreeModel = "DecisionTree"
 
   //--------mysql table

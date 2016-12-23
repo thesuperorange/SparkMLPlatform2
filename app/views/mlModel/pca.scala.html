@@ -1,9 +1,9 @@
 @import helper._
+@import util.Utilities
+@(myForm: Form[(String,String)], parquetlist: List[String],result:String,user:String)(implicit messages: Messages)
 
-@(myForm: Form[(String,String)], parquetlist: List[String],result:String)(implicit messages: Messages)
 
-
-  @main(title = "PCA") {
+  @main(title = "PCA",test = user) {
 
 
     <h3>Principal Component Analysis</h3>
@@ -18,7 +18,7 @@
             '_label -> "Select your parquet name")
 
           @inputText(
-            field = myForm("k"),
+            field = myForm("k").copy(value=Some("3")),
             args = '_label -> "k", 'placeholder -> "3"
           )
 
@@ -39,6 +39,17 @@
       <script>
               d3.select('#linechart').datum(@Html(result)).call(line());
       </script>
+        @if(user!="NULL"){
+            @form(action = routes.Simple.saveModel) {
 
+                <input type="text" name="outputFolder" value="temp"> <br>
+                <input type="hidden" name ="timestamp" value="NULL" ><br>
+                <input type="hidden" name = "type" value="@Utilities.pcaModel" ><br>
+
+                <p class="buttons">
+                <input type="submit" id="submit">
+                </p>
+            }
+        }
     }
   }
