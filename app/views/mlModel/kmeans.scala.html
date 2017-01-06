@@ -51,8 +51,8 @@
     </script>
     @if(user!="NULL"){
     @form(action = routes.Simple.saveModel) {
-
-      <input type="text" name="outputFolder" value="temp"> <br>
+      <h3>Save Model as: </h3>
+      <input type="text" name="outputFolder" value="kmeansModel"> <br>
       <input type="hidden" name ="timestamp" value="NULL" ><br>
       <input type="hidden" name = "type" value="@Utilities.kmeansModel" ><br>
 

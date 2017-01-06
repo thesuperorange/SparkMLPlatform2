@@ -156,21 +156,24 @@
 
 
 
-    <br>
+    <!--<br>
     pvalues = @regResult.pValues
     <br>
     coefficientStandardErrors = @regResult.coefficientStandardErrors
+    -->
     <br>
-    meanSquaredError = @regResult.meanSquaredError
+    Mean Squared Error = @regResult.meanSquaredError
     <br>
-    totalIter = @regResult.totalIter
+    Total Iteration = @regResult.totalIter
     <br>
+
 
 
   @if(user!="NULL"){
     @form(action = routes.Simple.saveModel) {
 
-      <input type="text" name="outputFolder" value="temp"> <br>
+        <h3>Save Model as: </h3>
+      <input type="text" name="outputFolder" value="lrModel"> <br>
       <input type="hidden" name ="timestamp" value="@regResult.timestamp" ><br>
       <input type="hidden" name = "type" value="@Utilities.linearModel" ><br>
 

@@ -210,7 +210,7 @@ class Preprocess @Inject()(db: Database)(val messagesApi: MessagesApi) extends C
         SPARK.closeAll()
       }
 
-      Ok(html.showtext(outputFolder,jeffrey))
+      Ok(html.showtext(outputFolder+" saved successfully!",jeffrey))
 
   }
 
@@ -275,9 +275,10 @@ class Preprocess @Inject()(db: Database)(val messagesApi: MessagesApi) extends C
           val colNames = df.columns
           val assembler = new VectorAssembler().setInputCols(colNames).setOutputCol("features")
           val df2 = assembler.transform(df).select("features")
-          df2.write.parquet(outputFolder)
+          df2.write.parquet(jeffrey+"/"+outputFolder)
 
-          DB.insertPre2(outputFolder, inputFilename, true,jeffrey)
+          DB.insertPre2(outputFolder, inputFilename, false,jeffrey)
+          //DB.insertPre2(jeffrey+"/"+outputFolder, inputFilename, true,jeffrey)
 
 
         } catch {
@@ -290,7 +291,7 @@ class Preprocess @Inject()(db: Database)(val messagesApi: MessagesApi) extends C
         } finally {
           SPARK.closeAll()
         }
-        Ok(html.showtext(outputFolder,jeffrey))
+        Ok(html.showtext(outputFolder+" saved successfully!",jeffrey))
       }
     )
   }
