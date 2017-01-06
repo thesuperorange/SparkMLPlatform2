@@ -1,5 +1,6 @@
 @import play.api.mvc.Session
 @import play.mvc.Http.Session
+
 @(title: String,test:String)(content: Html)
 
 
@@ -37,11 +38,11 @@
             <h1>Spark ML Platform</h1>
 
                 <!--Session.get("username");-->
-            <div align="right"><a href="@routes.Entrance.signin()" >login</a></div>
+            <div align="right">
 
-            <div align="right"><a href="@routes.Entrance.signup()" >Signup</a></div>
-
-            <div align="right"><a href="@routes.Entrance.logout()" >logout</a></div>
+            <a href="@routes.Entrance.signin()" >login</a>
+                <a href="@routes.Entrance.signup()" >Signup</a>
+                <a href="@routes.Entrance.logout()" >logout</a></div>
             <div id="smoothmenu1" >
 
                 <ul >

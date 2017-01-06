@@ -45,10 +45,14 @@ class FeatureSelection @Inject()(val messagesApi: MessagesApi) extends Controlle
           val pcaDF = pca.transform(df)
 
           val timestamp: Long = System.currentTimeMillis
+<<<<<<< HEAD
           if(jeffrey!="NULL") {
             pca.save(jeffrey + "/" + Utilities.pcaModel + "/" + timestamp)
           }
             //------
+=======
+        
+>>>>>>> 3d8d556ccd9e53f3b5e8213d2f0405bcc40575b9
           val b = pcaDF.select("pcaFeatures").rdd.map { x => x.getAs[Vector](0) }
 
           def transpose(m: Array[Array[Double]]): Array[Array[Double]] = {

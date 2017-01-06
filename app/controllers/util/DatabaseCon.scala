@@ -44,7 +44,7 @@ class DatabaseCon(db: Database) {
       val stmt = conn.createStatement
       val rs = stmt.executeQuery("SELECT * from " + tablename +" where id = "+"'"+user+"'" )
       if(rs.next()){
-        var secret = rs.getString("pasword")
+        var secret = rs.getString("password")
         var b = BCrypt.checkpw(password, secret)
         if(b){
           println("Welcome")

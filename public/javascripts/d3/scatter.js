@@ -148,7 +148,7 @@ function scatter(tag) {
                     .attr("x2", 450)
                     .attr("y1", 450)
                     .attr("y2", 50)
-                    .attr("stroke", "#ffe4e1")
+                    .attr("stroke", "#ffc1b2")
                     .attr("stroke-width",2);
             }
             if(tag==2) {
@@ -157,7 +157,7 @@ function scatter(tag) {
                     .attr("x2", 450)
                     .attr("y1", 237)
                     .attr("y2", 237)
-                    .attr("stroke", "#ffe4e1")
+                    .attr("stroke", "#ffc1b2")
                     .attr("stroke-width",2);
             }
 
