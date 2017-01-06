@@ -1,6 +1,6 @@
 @import helper._
 
-@(csvInput: Form[(String,Boolean)],header:String,datatype: Seq[(String, String)], summary: Form[StatSummary],corMatrix:String,user:String)(implicit messages: Messages)
+@(guestSelect: Form[(String,Boolean)],data:List[String],csvInput: Form[(String,Boolean)],header:String,datatype: Seq[(String, String)], summary: Form[StatSummary],corMatrix:String,user:String)(implicit messages: Messages)
 
 @main(title = "Input Radio Group Sample",test = user) {
 
@@ -10,17 +10,28 @@
     @if(datatype==null && summary==null && corMatrix ==null){
         @form(action = routes.Preprocess.preprocess1_summary()) {
             <fieldset>
+                @if(user!="NULL") {
+                    <legend>Input Parameters</legend>
+                    @inputText(
+                        csvInput("path"),
+                        '_label -> "CSV path",
+                        'placeholder -> "path of your csv in hdfs"
+                    )
+                    @checkbox(
+                        csvInput("header"),
+                        /*'label->"Confirm:",'_text->"Is first line header?",*/ '_help -> ""
+                    )
+                }else{
+                    @select(
+                        guestSelect("file"),
+                        options(data),
+                        '_label -> "file")
+                    @checkbox(
+                        guestSelect("header"),
+                        /*'label->"Confirm:",'_text->"Is first line header?",*/ '_help -> ""
+                    )
 
-                <legend>Input Parameters</legend>
-                @inputText(
-                    csvInput("path"),
-                    '_label -> "CSV path",
-                    'placeholder -> "path of your csv in hdfs"
-                )
-                @checkbox(
-                    csvInput("header"),
-                    /*'label->"Confirm:",'_text->"Is first line header?",*/'_help->""
-                )
+                }
                 <div class="submit">
                     <input type="submit" id="submit" value="submit">
                 </div>
@@ -43,8 +54,12 @@
 
         <div class="col-sm-12" id="correlation"></div>
         <script>
+
                 var corData = @Html(corMatrix)
-                        d3.select('#correlation').datum(corData).call(heatmap());
+                //println(corMatrix,corMatrix.size)
+                @if(corMatrix.size<5000) {
+                d3.select('#correlation').datum(corData).call(heatmap());
+            }
         </script>
 
         <br>
@@ -174,6 +189,7 @@
                 form.appendChild(document.createTextNode("Output name"));
                 var outputPath = document.createElement("input");
                 outputPath.type='text'
+                outputPath.required = 'required'
                 outputPath.name = 'outputFolder'
                 form.appendChild(outputPath);
 

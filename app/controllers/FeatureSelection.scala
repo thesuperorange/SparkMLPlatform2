@@ -35,7 +35,7 @@ class FeatureSelection @Inject()(val messagesApi: MessagesApi) extends Controlle
         val SPARK = new SparkConfCreator(Utilities.master,this.getClass.getSimpleName)
         val SparkSession = SPARK.getSession()
         //val sc = SPARK.getSC()
-
+        var x = ""
         var json = org.json4s.jackson.renderJValue("")
 
         try {
@@ -45,8 +45,10 @@ class FeatureSelection @Inject()(val messagesApi: MessagesApi) extends Controlle
           val pcaDF = pca.transform(df)
 
           val timestamp: Long = System.currentTimeMillis
-          pca.save(jeffrey + "/" + Utilities.pcaModel + "/" + "NULL")
-          //------
+          if(jeffrey!="NULL") {
+            pca.save(jeffrey + "/" + Utilities.pcaModel + "/" + timestamp)
+          }
+            //------
           val b = pcaDF.select("pcaFeatures").rdd.map { x => x.getAs[Vector](0) }
 
           def transpose(m: Array[Array[Double]]): Array[Array[Double]] = {
@@ -73,7 +75,7 @@ class FeatureSelection @Inject()(val messagesApi: MessagesApi) extends Controlle
 
           //println(pretty(json))
           //result = pcaDF.select("pcaFeatures").map(_.toString).collect
-
+         x = timestamp.toString
         }
         catch {
           case e: Exception => {
@@ -81,11 +83,12 @@ class FeatureSelection @Inject()(val messagesApi: MessagesApi) extends Controlle
             SPARK.closeAll()
           }
         } finally {
+
           SPARK.closeAll()
         }
 
 
-        Ok(html.mlModel.pca(InputForms.KmeansParam, null, pretty(json),jeffrey))
+        Ok(html.mlModel.pca(InputForms.KmeansParam, null, pretty(json),jeffrey,x))
       }
 
     )
@@ -123,7 +126,7 @@ class FeatureSelection @Inject()(val messagesApi: MessagesApi) extends Controlle
                 val prediction = pca.transform(df)
                 prediction.show
                 res = prediction.select("pcaFeatures").rdd.map(r => r(0).toString).collect
-
+                println(res)
                 delete
                 prediction.write.format("com.databricks.spark.csv").option("header", true).option("inferSchema", "true").csv("/home/pzq317/Desktop/test")
               }

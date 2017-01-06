@@ -170,7 +170,7 @@
   @if(user!="NULL"){
     @form(action = routes.Simple.saveModel) {
 
-      <input type="text" name="outputFolder" value="temp"> <br>
+      <input type="text" name="outputFolder" required="required"> <br>
       <input type="hidden" name ="timestamp" value="@regResult.timestamp" ><br>
       <input type="hidden" name = "type" value="@Utilities.linearModel" ><br>
 

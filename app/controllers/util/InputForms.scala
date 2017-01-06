@@ -10,7 +10,9 @@ import play.api.data.Forms._
   */
 object InputForms {
   val download= Form(
+
       "csvPath" -> nonEmptyText
+
   )
   val SignIn= Form(
     tuple(
@@ -70,6 +72,12 @@ object InputForms {
 
   val csvPathIn = Form(
     "path" -> nonEmptyText
+  )
+  val guestSelect = Form(
+    tuple(
+    "file"->nonEmptyText,
+    "header"->boolean
+    )
   )
 
 //save model

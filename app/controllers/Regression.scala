@@ -58,8 +58,9 @@ class Regression @Inject()(val messagesApi: MessagesApi) extends Controller with
 
 
         val timestamp: Long = System.currentTimeMillis
-        lrModel.save(jeffrey + "/" + Utilities.linearModel + "/" + timestamp)
-
+        if(jeffrey!="NULL") {
+          lrModel.save(jeffrey + "/" + Utilities.linearModel + "/" + timestamp)
+        }
         val trainingSummary = lrModel.summary
 
         val pValues: Seq[Double] = try {
@@ -172,6 +173,7 @@ class Regression @Inject()(val messagesApi: MessagesApi) extends Controller with
 
             //result = prediction.select(mean($"prediction")).first.toString
             res = prediction.select("prediction").rdd.map(r=>r(0).toString).collect
+
 
           }
           else {

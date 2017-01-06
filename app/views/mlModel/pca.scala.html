@@ -1,6 +1,6 @@
 @import helper._
 @import util.Utilities
-@(myForm: Form[(String,String)], parquetlist: List[String],result:String,user:String)(implicit messages: Messages)
+@(myForm: Form[(String,String)], parquetlist: List[String],result:String,user:String,timestamp:String)(implicit messages: Messages)
 
 
   @main(title = "PCA",test = user) {
@@ -42,8 +42,8 @@
         @if(user!="NULL"){
             @form(action = routes.Simple.saveModel) {
 
-                <input type="text" name="outputFolder" value="temp"> <br>
-                <input type="hidden" name ="timestamp" value="NULL" ><br>
+                <input type="text" name="outputFolder" required="required"> <br>
+                <input type="hidden" name ="timestamp" value=@timestamp ><br>
                 <input type="hidden" name = "type" value="@Utilities.pcaModel" ><br>
 
                 <p class="buttons">

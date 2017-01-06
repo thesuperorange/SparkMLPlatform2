@@ -21,5 +21,6 @@ object Utilities {
   val pre1Table = "Pre1"
   val pre2Table = "Pre2"
   val userData = "userData"
+  val path = "path"
 
 }

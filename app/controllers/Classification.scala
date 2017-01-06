@@ -48,8 +48,9 @@ class Classification  @Inject()(val messagesApi: MessagesApi) extends Controller
           import sqlContext.implicits._
 
           val timestamp: Long = System.currentTimeMillis
-          lrModel.save(jeffrey + "/" + Utilities.logisticModel + "/" + timestamp)
-
+          if(jeffrey!="NULL") {
+            lrModel.save(jeffrey + "/" + Utilities.logisticModel + "/" + timestamp)
+          }
           val coefficients: Array[Double] = lrModel.coefficients.toArray
           val intercept: Double = lrModel.intercept
 

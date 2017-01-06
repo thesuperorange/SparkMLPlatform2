@@ -39,6 +39,7 @@ class Clustering @Inject()(val messagesApi: MessagesApi) extends Controller with
         val df = SparkSession.read.load(jeffrey+"/"+inputFilename)
         var center: List[String] = List()
         var JsonStr = "{"
+        var x = ""
         try {
 
          
@@ -48,8 +49,10 @@ class Clustering @Inject()(val messagesApi: MessagesApi) extends Controller with
           val model = kmeans.fit(df)
 
           val timestamp: Long = System.currentTimeMillis
-          model.save(jeffrey + "/" + Utilities.kmeansModel + "/" + "NULL")
-          // Shows the result
+          if(jeffrey!="NULL") {
+            model.save(jeffrey + "/" + Utilities.kmeansModel + "/" + timestamp)
+          }
+            // Shows the result
           println("Final Centers: ")
           model.clusterCenters.foreach(x => center = x.toString :: center)
 
@@ -82,7 +85,7 @@ class Clustering @Inject()(val messagesApi: MessagesApi) extends Controller with
             str += "f" + i + ":[" + seqDF.select("f"+i).rdd.map(x=>x(0)).collect.mkString(",") + "],"
           }
           JsonStr += str.substring(0, str.length - 1) + "}"
-
+          x = timestamp.toString
         }
         catch {
           case e: Exception => {
@@ -93,7 +96,7 @@ class Clustering @Inject()(val messagesApi: MessagesApi) extends Controller with
           sc.stop()
         }
 
-        Ok(html.mlModel.kmeans(InputForms.KmeansParam, null, center, JsonStr,jeffrey))
+        Ok(html.mlModel.kmeans(InputForms.KmeansParam, null, center, JsonStr,jeffrey,x))
       }
 
     )

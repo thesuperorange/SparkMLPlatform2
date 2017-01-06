@@ -26,15 +26,18 @@ class Preprocess @Inject()(db: Database)(val messagesApi: MessagesApi) extends C
 
   //-----------preprocess1
   def preprocess1_summary = Action { implicit request =>
+    var jeffrey = ""
+
+    request.session.get("username").map { user =>
+      jeffrey = user
+    }.getOrElse {
+      jeffrey = "NULL"
+    }
+    if(jeffrey!="NULL"){
     InputForms.InputParam.bindFromRequest.fold(
       formWithErrors => BadRequest("error"), { case (path,header) =>
 
-        var jeffrey = ""
-        request.session.get("username").map { user =>
-          jeffrey = user
-        }.getOrElse {
-          jeffrey = "NULL"
-        }
+
         val SPARK = new SparkConfCreator(Utilities.master,this.getClass.getSimpleName)
 
         val sc = SPARK.getSC()
@@ -46,7 +49,7 @@ class Preprocess @Inject()(db: Database)(val messagesApi: MessagesApi) extends C
         var finalString=org.json4s.jackson.renderJValue("")
 
         try {
-
+          println("path",path)
 
           val df = sparkSession.read
             .option("header", header.toString) // Use first line of all files as header
@@ -58,13 +61,13 @@ class Preprocess @Inject()(db: Database)(val messagesApi: MessagesApi) extends C
           val columnNames =df.columns
           df.show
           val isStringArr = new Array[(Boolean,String)](df.columns.size)
-          println("1")
+
           datatype.zipWithIndex.foreach(x=> {
             if ((x._1._2) == "StringType"){ isStringArr(x._2) = (true,x._1._1)}
             else{isStringArr(x._2) = (false,x._1._1)}
           }
           )
-          println("2")
+
 
           val rawData = sc.textFile(path)
 
@@ -73,9 +76,9 @@ class Preprocess @Inject()(db: Database)(val messagesApi: MessagesApi) extends C
               line._1.trim.split(",").zipWithIndex.filter(x=> ( !isStringArr(x._2.toInt)._1  )).map(_._1.toDouble)
             )
           }
-          println("3")
+
           val summaryResult: MultivariateStatisticalSummary = Statistics.colStats(parseData)
-          println("4")
+
           println("mean",summaryResult.mean)
           val corMatrix =Statistics.corr(parseData)
           //println("cor",corMatrix)
@@ -123,10 +126,119 @@ class Preprocess @Inject()(db: Database)(val messagesApi: MessagesApi) extends C
           SPARK.closeAll()
 
         }
-        Ok(html.preprocess.dataimport_pre1(InputForms.InputParam.fill(path,false),header.toString,datatype, boundForm, pretty(finalString),jeffrey))
+        Ok(html.preprocess.dataimport_pre1(null,null,InputForms.InputParam.fill(path,false),header.toString,datatype, boundForm, pretty(finalString),jeffrey))
       }
 
     )
+    }else{
+    InputForms.guestSelect.bindFromRequest.fold(
+      formWithErrors => BadRequest("error"), { case (file,header) =>
+
+        var jeffrey = ""
+        //var path = ""
+        request.session.get("username").map { user =>
+          jeffrey = user
+        }.getOrElse {
+          jeffrey = "NULL"
+        }
+        println("NLname",file)
+        val DB = new DatabaseCon(db)
+
+        var path = DB.getPath(file)
+        println("path",path)
+        val SPARK = new SparkConfCreator(Utilities.master,this.getClass.getSimpleName)
+
+        val sc = SPARK.getSC()
+        val sparkSession = SPARK.getSession()
+
+
+        var datatype: Array[(String, String)] =Array()
+        var boundForm: Form[StatSummary] = InputForms.summaryForm
+        var finalString=org.json4s.jackson.renderJValue("")
+
+        try {
+
+
+          val df = sparkSession.read
+            .option("header", header.toString) // Use first line of all files as header
+            .option("inferSchema", "true") // Automatically infer data types
+            .csv(path)
+
+
+          datatype= df.dtypes
+          val columnNames =df.columns
+          df.show
+          val isStringArr = new Array[(Boolean,String)](df.columns.size)
+
+          datatype.zipWithIndex.foreach(x=> {
+            if ((x._1._2) == "StringType"){ isStringArr(x._2) = (true,x._1._1)}
+            else{isStringArr(x._2) = (false,x._1._1)}
+          }
+          )
+
+
+          val rawData = sc.textFile(path)
+
+          val parseData = rawData.zipWithIndex.filter(_._2>2).map{line=>
+            Vectors.dense(
+              line._1.trim.split(",").zipWithIndex.filter(x=> ( !isStringArr(x._2.toInt)._1  )).map(_._1.toDouble)
+            )
+          }
+
+          val summaryResult: MultivariateStatisticalSummary = Statistics.colStats(parseData)
+
+          println("mean",summaryResult.mean)
+          val corMatrix =Statistics.corr(parseData)
+          //println("cor",corMatrix)
+          //corMatrix.numCols
+
+          //val corResult = corMatrix.toArray.map(x=>Math.round(x*1000.0)/1000.0)
+          //println(corMatrix)
+          //heat map
+          val lM = corMatrix.toArray.grouped(corMatrix.numRows).toArray
+          //println("Lm",lM)
+          for(i<-0 to lM.length-1){
+            var a=columnNames(i)
+
+            lM(i).foreach(x=>{val a = List(BigDecimal(x).setScale(3, BigDecimal.RoundingMode.HALF_UP).toDouble); })
+
+            var list = List[Double]()
+            lM(i).foreach(
+              x=> {
+                list = list :+ BigDecimal(x).setScale(3, BigDecimal.RoundingMode.HALF_UP).toDouble
+              }
+            )
+            finalString = finalString merge org.json4s.jackson.renderJValue(a, list)
+            //println(finalString)
+          }
+          println("mean",summaryResult.mean)
+
+          val x = Map(
+            "max" -> summaryResult.max.toString,
+            "mean" -> summaryResult.mean.toString,
+            "min" -> summaryResult.min.toString,
+            "variance" -> summaryResult.variance.toString,
+            "numNonZero" -> summaryResult.numNonzeros.toString,
+            "count" -> summaryResult.count.toString
+          )
+          boundForm = InputForms.summaryForm.bind(x)
+        }
+        catch {
+          case e: Exception => {
+            // Ok(html.error(e.toString))   //useless
+            println("error in preprocess:" + e)
+            //Ok(html.preprocess.dataimport_pre1(InputForms.guestSelect, DB.getPathInfo(),InputForms.InputParam,null,null,null,null,jeffrey))
+            SPARK.closeAll()
+          }
+        } finally {
+          SPARK.closeAll()
+
+        }
+        Ok(html.preprocess.dataimport_pre1(null,null,InputForms.InputParam.fill(path,false),header.toString,datatype, boundForm, pretty(finalString),jeffrey))
+      }
+
+    )
+    }
 
   }
 

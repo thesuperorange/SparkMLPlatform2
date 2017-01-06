@@ -82,9 +82,11 @@ class Entrance @Inject()(db: Database)(val messagesApi: MessagesApi) extends Con
   def dataimport_pre1 = Action {request =>
     InputForms.InputParam.fill("sss",false)
     request.session.get("username").map {user=>
-      Ok(html.preprocess.dataimport_pre1(InputForms.InputParam,null,null,null,null,user))
+      val DB = new DatabaseCon(db)
+      Ok(html.preprocess.dataimport_pre1(InputForms.guestSelect, DB.getPathInfo(user),InputForms.InputParam,null,null,null,null,user))
     }.getOrElse {
-      Ok(html.preprocess.dataimport_pre1(InputForms.InputParam,null,null,null,null,"NULL"))
+      val DB = new DatabaseCon(db)
+      Ok(html.preprocess.dataimport_pre1(InputForms.guestSelect,DB.getPathInfo("NULL"),InputForms.InputParam,null,null,null,null,"NULL"))
     }
   }
 
@@ -160,10 +162,10 @@ class Entrance @Inject()(db: Database)(val messagesApi: MessagesApi) extends Con
     request.session.get("username").map {user=>
       println("dataimport_pre2" + user)
       val DB = new DatabaseCon(db)
-      Ok(html.mlModel.kmeans(InputForms.KmeansParam, DB.getPre2Info(user), null, null,user))
+      Ok(html.mlModel.kmeans(InputForms.KmeansParam, DB.getPre2Info(user), null, null,user,null))
     }.getOrElse {
       val DB = new DatabaseCon(db)
-      Ok(html.mlModel.kmeans(InputForms.KmeansParam, DB.getPre2Info("NULL"), null, null,"NULL"))
+      Ok(html.mlModel.kmeans(InputForms.KmeansParam, DB.getPre2Info("NULL"), null, null,"NULL",null))
     }
 
   }
@@ -182,10 +184,10 @@ class Entrance @Inject()(db: Database)(val messagesApi: MessagesApi) extends Con
     request =>
       request.session.get("username").map { user =>
         val DB = new DatabaseCon(db)
-        Ok(html.mlModel.pca(InputForms.KmeansParam, DB.getPre2Info(user), null,user))
+        Ok(html.mlModel.pca(InputForms.KmeansParam, DB.getPre2Info(user), null,user,"NULL"))
       }.getOrElse {
         val DB = new DatabaseCon(db)
-        Ok(html.mlModel.pca(InputForms.KmeansParam, DB.getPre2Info("NULL"), null,"NULL"))
+        Ok(html.mlModel.pca(InputForms.KmeansParam, DB.getPre2Info("NULL"), null,"NULL","NULL"))
       }
   }
       def pca_trans = Action {request =>

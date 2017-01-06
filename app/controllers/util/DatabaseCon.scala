@@ -193,6 +193,46 @@ class DatabaseCon(db: Database) {
     }
     return dbname
   }
+  def getPathInfo(user:String): List[String] = {
+    val tablename = Utilities.path
+    val conn = db.getConnection()
+    var dbname = List[String]()
+    try {
+      val stmt = conn.createStatement
+      println("SELECT * from " + tablename +" where users = "+user)
+      val rs = stmt.executeQuery("SELECT * from " + tablename +" where users = "+"'"+user+"'" )
+      while (rs.next()) {
+        dbname = rs.getString("name") :: dbname
+      }
+    } finally {
+      conn.close()
+    }
+    return dbname
+  }
+
+  def getPath(name:String): String = {
+    val tablename = Utilities.path
+    val conn = db.getConnection()
+    var pa = ""
+    try {
+      val stmt = conn.createStatement
+      println("SELECT * from " + tablename +" where name = "+"'"+name+"'")
+      val rs = stmt.executeQuery("SELECT * from " + tablename +" where name = "+"'"+name+"'" )
+      //println(rs.next())
+      //while(rs.next()) {
+        rs.next()
+        pa = rs.getString("path")
+      println(pa)
+      println(rs.getString("path"))
+      //}
+      println(pa)
+    } finally {
+      conn.close()
+    }
+    return pa
+  }
+
+
   def insertModel(outputPathName:String, modelType: String, user:String)={
     //------sql connect------
     val conn = db.getConnection()
