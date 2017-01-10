@@ -25,10 +25,10 @@ class Entrance @Inject()(db: Database)(val messagesApi: MessagesApi) extends Con
   def reg_trans = Action {request =>
     request.session.get("username").map { user =>
       val DB = new DatabaseCon(db)
-      Ok(html.mlTrans.regression_transform(InputForms.ModelParam,null, DB.getPre2Info(user), DB.getModelInfo(user,Utilities.linearModel), null, null,user))
+      Ok(html.mlTrans.regression_transform(InputForms.ModelParam,null, DB.getPre2Info(user,true), DB.getModelInfo(user,Utilities.linearModel), null, null,user))
     }.getOrElse{
       val DB = new DatabaseCon(db)
-      Ok(html.mlTrans.regression_transform(InputForms.ModelParam,null, DB.getPre2Info("NULL"), DB.getModelInfo("NULL",Utilities.linearModel), null, null,"NULL"))
+      Ok(html.mlTrans.regression_transform(InputForms.ModelParam,null, DB.getPre2Info("NULL",true), DB.getModelInfo("NULL",Utilities.linearModel), null, null,"NULL"))
     }
   }
   //--------------regression training---------------
@@ -118,12 +118,12 @@ class Entrance @Inject()(db: Database)(val messagesApi: MessagesApi) extends Con
     request.session.get("username").map {user=>
       println("dataimport_pre2" + user)
       val DB = new DatabaseCon(db)
-      Ok(html.mlModel.linearRegression(InputForms.elasticInput, DB.getPre2Info(user), null,user))
+      Ok(html.mlModel.linearRegression(InputForms.elasticInput, DB.getPre2Info(user,true), null,user))
     }.getOrElse {
       //println(DB.getPre2Info("NULL"))
       val DB = new DatabaseCon(db)
-      println(DB.getPre2Info("NULL"))
-      Ok(html.mlModel.linearRegression(InputForms.elasticInput, DB.getPre2Info("NULL"), null,"NULL"))
+     // println(DB.getPre2Info("NULL"))
+      Ok(html.mlModel.linearRegression(InputForms.elasticInput, DB.getPre2Info("NULL",true), null,"NULL"))
     }
 
   }
@@ -131,22 +131,22 @@ class Entrance @Inject()(db: Database)(val messagesApi: MessagesApi) extends Con
 
   def log_reg = Action { request =>
     request.session.get("username").map { user =>
-      println("dataimport_pre2" + user)
+      //println("dataimport_pre2" + user)
       val DB = new DatabaseCon(db)
-      Ok(html.mlModel.logisticRegression(InputForms.elasticInput, DB.getPre2Info(user), null,user))
+      Ok(html.mlModel.logisticRegression(InputForms.elasticInput, DB.getPre2Info(user,true), null,user))
     }.getOrElse {
       val DB = new DatabaseCon(db)
-      Ok(html.mlModel.logisticRegression(InputForms.elasticInput, DB.getPre2Info("NULL"), null,"NULL"))
+      Ok(html.mlModel.logisticRegression(InputForms.elasticInput, DB.getPre2Info("NULL",true), null,"NULL"))
     }
   }
   //---------------logistic regression transform--------------
   def log_trans = Action {request =>
     request.session.get("username").map { user =>
       val DB = new DatabaseCon(db)
-      Ok(html.mlTrans.log_transform(InputForms.ModelParam,null, DB.getPre2Info(user), DB.getModelInfo(user,Utilities.logisticModel), null, null,user))
+      Ok(html.mlTrans.log_transform(InputForms.ModelParam,null, DB.getPre2Info(user,true), DB.getModelInfo(user,Utilities.logisticModel), null, null,user))
     }.getOrElse{
       val DB = new DatabaseCon(db)
-      Ok(html.mlTrans.log_transform(InputForms.ModelParam,null, DB.getPre2Info("NULL"), DB.getModelInfo("NULL",Utilities.logisticModel), null, null,"NULL"))
+      Ok(html.mlTrans.log_transform(InputForms.ModelParam,null, DB.getPre2Info("NULL",true), DB.getModelInfo("NULL",Utilities.logisticModel), null, null,"NULL"))
     }
   }
     /*val DB = new DatabaseCon(db)
@@ -162,10 +162,10 @@ class Entrance @Inject()(db: Database)(val messagesApi: MessagesApi) extends Con
     request.session.get("username").map {user=>
       println("dataimport_pre2" + user)
       val DB = new DatabaseCon(db)
-      Ok(html.mlModel.kmeans(InputForms.KmeansParam, DB.getPre2Info(user), null, null,user,null))
+      Ok(html.mlModel.kmeans(InputForms.KmeansParam, DB.getPre2Info(user,false), null, null,user,null))
     }.getOrElse {
       val DB = new DatabaseCon(db)
-      Ok(html.mlModel.kmeans(InputForms.KmeansParam, DB.getPre2Info("NULL"), null, null,"NULL",null))
+      Ok(html.mlModel.kmeans(InputForms.KmeansParam, DB.getPre2Info("NULL",false), null, null,"NULL",null))
     }
 
   }
@@ -173,10 +173,10 @@ class Entrance @Inject()(db: Database)(val messagesApi: MessagesApi) extends Con
   def kmean_trans = Action {request =>
     request.session.get("username").map { user =>
       val DB = new DatabaseCon(db)
-      Ok(html.mlTrans.kmeans(InputForms.ModelParam,null, DB.getPre2Info(user), DB.getModelInfo(user,Utilities.kmeansModel), null, null,user))
+      Ok(html.mlTrans.kmeans(InputForms.ModelParam,null, DB.getPre2Info(user,false), DB.getModelInfo(user,Utilities.kmeansModel), null, null,user))
     }.getOrElse{
       val DB = new DatabaseCon(db)
-      Ok(html.mlTrans.kmeans(InputForms.ModelParam,null, DB.getPre2Info("NULL"), DB.getModelInfo("NULL",Utilities.kmeansModel), null, null,"NULL"))
+      Ok(html.mlTrans.kmeans(InputForms.ModelParam,null, DB.getPre2Info("NULL",false), DB.getModelInfo("NULL",Utilities.kmeansModel), null, null,"NULL"))
     }
   }
   //----------------PCA --------------------
@@ -184,19 +184,19 @@ class Entrance @Inject()(db: Database)(val messagesApi: MessagesApi) extends Con
     request =>
       request.session.get("username").map { user =>
         val DB = new DatabaseCon(db)
-        Ok(html.mlModel.pca(InputForms.KmeansParam, DB.getPre2Info(user), null,user,"NULL"))
+        Ok(html.mlModel.pca(InputForms.KmeansParam, DB.getPre2Info(user,true), null,user,"NULL"))
       }.getOrElse {
         val DB = new DatabaseCon(db)
-        Ok(html.mlModel.pca(InputForms.KmeansParam, DB.getPre2Info("NULL"), null,"NULL","NULL"))
+        Ok(html.mlModel.pca(InputForms.KmeansParam, DB.getPre2Info("NULL",true), null,"NULL","NULL"))
       }
   }
       def pca_trans = Action {request =>
         request.session.get("username").map { user =>
           val DB = new DatabaseCon(db)
-          Ok(html.mlTrans.pca(InputForms.ModelParam,null, DB.getPre2Info(user), DB.getModelInfo(user,Utilities.pcaModel), null, null, user))
+          Ok(html.mlTrans.pca(InputForms.ModelParam,null, DB.getPre2Info(user,false), DB.getModelInfo(user,Utilities.pcaModel), null, null, user))
         }.getOrElse{
           val DB = new DatabaseCon(db)
-          Ok(html.mlTrans.pca(InputForms.ModelParam,null, DB.getPre2Info("NULL"), DB.getModelInfo("NULL",Utilities.pcaModel), null, null,"NULL"))
+          Ok(html.mlTrans.pca(InputForms.ModelParam,null, DB.getPre2Info("NULL",false), DB.getModelInfo("NULL",Utilities.pcaModel), null, null,"NULL"))
         }
       }
     /*val DB = new DatabaseCon(db)

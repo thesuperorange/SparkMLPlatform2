@@ -44,7 +44,7 @@
         <link rel="stylesheet" href="@routes.Assets.at("stylesheets/d3/corr.css")">
 
 
-
+        @if(corMatrix.size<5000) {
         <h2> Correlation Matrix</h2>
 
 
@@ -57,7 +57,7 @@
 
                 var corData = @Html(corMatrix)
                 //println(corMatrix,corMatrix.size)
-                @if(corMatrix.size<5000) {
+
                 d3.select('#correlation').datum(corData).call(heatmap());
             }
         </script>

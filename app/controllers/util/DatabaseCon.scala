@@ -12,19 +12,19 @@ class DatabaseCon(db: Database) {
     //------sql connect------
     val conn = db.getConnection()
     val tablename = Utilities.userData
-    println(user)
+    //println(user)
     try {
       val stmt = conn.createStatement
-      println(email,password,user)
+      //println(email,password,user)
       //val rs = stmt.executeQuery("SELECT * from " + tablename )
-      println("SELECT * from " + tablename +" where id = "+"'"+user+"'")
+      //println("SELECT * from " + tablename +" where id = "+"'"+user+"'")
       val rs = stmt.executeQuery("SELECT * from " + tablename +" where id = "+"'"+user+"'" )
       if (rs.next()){
         println("user exist try another one")
         return true
       }
       else{
-        println("success")
+        //println("success")
         stmt.executeUpdate("INSERT INTO " + tablename + " VALUES ('" + user + "','" + email + "','"+ password + "')")
         return false
       }
@@ -39,7 +39,7 @@ class DatabaseCon(db: Database) {
     val conn = db.getConnection()
     val tablename = Utilities.userData
 
-    println(user)
+    //println(user)
     try {
       val stmt = conn.createStatement
       val rs = stmt.executeQuery("SELECT * from " + tablename +" where id = "+"'"+user+"'" )
@@ -85,10 +85,10 @@ class DatabaseCon(db: Database) {
     //------sql connect------
     val conn = db.getConnection()
     val tablename = Utilities.pre1Table
-    println(user)
+    //println(user)
     try {
       val stmt = conn.createStatement
-      println(outputPathName,fromPath,user.toString);
+      //println(outputPathName,fromPath,user.toString);
       stmt.executeUpdate("INSERT INTO " + tablename + " VALUES ('" + outputPathName + "','" + fromPath + "','"+ user + "')");
 
     } finally {
@@ -147,22 +147,22 @@ class DatabaseCon(db: Database) {
     return dbname
   }
 
-  def getPre2Info(users:String): List[String] = {
+  def getPre2Info(users:String,withLabel: Boolean): List[String] = {
     val tablename = Utilities.pre2Table
     val conn = db.getConnection()
     var dbname = List[String]()
     try {
       val stmt = conn.createStatement
-      println(users)
+      //println(users)
       if(users =="NULL") {
-        println("NULLLLLLLLLLL")
-        val rs = stmt.executeQuery("SELECT * from " + tablename + " where users='" + users + "'" )
+        //println("SELECT * from " + tablename + " where users='" + users +"'"+" AND label = "+ withLabel )
+        val rs = stmt.executeQuery("SELECT * from " + tablename + " where users='" + users +"'" +"AND label =" + withLabel )
         while (rs.next()) {
           dbname = rs.getString("name") :: dbname
         }
       }
       else{
-        val rs = stmt.executeQuery("SELECT * from " + tablename + " where users='" + users + "'")
+        val rs = stmt.executeQuery("SELECT * from " + tablename + " where users='" + users +"AND label = '" + withLabel + "'")
         while (rs.next()) {
           dbname = rs.getString("name") :: dbname
         }
@@ -183,7 +183,7 @@ class DatabaseCon(db: Database) {
     var dbname = List[String]()
     try {
       val stmt = conn.createStatement
-      println("SELECT * from " + tablename +" where users = "+user)
+      //println("SELECT * from " + tablename +" where users = "+user)
       val rs = stmt.executeQuery("SELECT * from " + tablename +" where users = "+"'"+user+"'" )
       while (rs.next()) {
         dbname = rs.getString("name") :: dbname
@@ -199,7 +199,7 @@ class DatabaseCon(db: Database) {
     var dbname = List[String]()
     try {
       val stmt = conn.createStatement
-      println("SELECT * from " + tablename +" where users = "+user)
+      //println("SELECT * from " + tablename +" where users = "+user)
       val rs = stmt.executeQuery("SELECT * from " + tablename +" where users = "+"'"+user+"'" )
       while (rs.next()) {
         dbname = rs.getString("name") :: dbname
@@ -216,16 +216,12 @@ class DatabaseCon(db: Database) {
     var pa = ""
     try {
       val stmt = conn.createStatement
-      println("SELECT * from " + tablename +" where name = "+"'"+name+"'")
+      //println("SELECT * from " + tablename +" where name = "+"'"+name+"'")
       val rs = stmt.executeQuery("SELECT * from " + tablename +" where name = "+"'"+name+"'" )
-      //println(rs.next())
-      //while(rs.next()) {
+
         rs.next()
         pa = rs.getString("path")
-      println(pa)
-      println(rs.getString("path"))
-      //}
-      println(pa)
+
     } finally {
       conn.close()
     }
@@ -237,7 +233,7 @@ class DatabaseCon(db: Database) {
     //------sql connect------
     val conn = db.getConnection()
     val tablename = "Model"
-    println(outputPathName,modelType)
+    //println(outputPathName,modelType)
     try {
       val stmt = conn.createStatement
       stmt.executeUpdate("INSERT INTO " + tablename + " VALUES ('" + outputPathName + "','" + modelType +"','"+ user +"')");
