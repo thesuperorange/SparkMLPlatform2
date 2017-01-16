@@ -156,13 +156,14 @@ class DatabaseCon(db: Database) {
       //println(users)
       if(users =="NULL") {
         //println("SELECT * from " + tablename + " where users='" + users +"'"+" AND label = "+ withLabel )
-        val rs = stmt.executeQuery("SELECT * from " + tablename + " where users='" + users +"'" +"AND label =" + withLabel )
+        val rs = stmt.executeQuery("SELECT * from " + tablename + " where users='" + users +"'" +" AND label =" + withLabel )
         while (rs.next()) {
           dbname = rs.getString("name") :: dbname
         }
       }
       else{
-        val rs = stmt.executeQuery("SELECT * from " + tablename + " where users='" + users +"AND label = '" + withLabel + "'")
+        //val rs = stmt.executeQuery("SELECT * from " + tablename + " where users='" + users +"AND label = '" + withLabel + "'")
+        val rs = stmt.executeQuery("SELECT * from " + tablename + " where users='" + users +"'" +" AND label =" + withLabel )
         while (rs.next()) {
           dbname = rs.getString("name") :: dbname
         }

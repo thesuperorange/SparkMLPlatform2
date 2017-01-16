@@ -130,7 +130,7 @@ class FeatureSelection @Inject()(val messagesApi: MessagesApi) extends Controlle
                 res = prediction.select("pcaFeatures").rdd.map(r => r(0).toString).collect
                 println(res)
                 delete
-                prediction.write.format("com.databricks.spark.csv").option("header", true).option("inferSchema", "true").csv("/home/pzq317/Desktop/test")
+                prediction.write.format("com.databricks.spark.csv").option("header", true).option("inferSchema", "true").csv(Utilities.Dpath)
               }
               else {
                 result = "[Error] feature number is not consistent"
@@ -170,7 +170,7 @@ class FeatureSelection @Inject()(val messagesApi: MessagesApi) extends Controlle
           val SparkSession = SPARK.getSession()
 
           try {
-            val prediction = SparkSession.read.csv("/home/pzq317/Desktop/test")
+            val prediction = SparkSession.read.csv(Utilities.Dpath)
             prediction.write.format("com.databricks.spark.csv").option("header",true).option("inferSchema", "true").csv(csvPath)
 
 
@@ -189,7 +189,7 @@ class FeatureSelection @Inject()(val messagesApi: MessagesApi) extends Controlle
   }
   def delete {
     //val path: Path = Path ("/home/pzq317/Desktop/SparkMLPlatform2/NULL")
-    val path = Path.fromString("/home/pzq317/Desktop/test")
+    val path = Path.fromString(Utilities.Dpath)
     path.deleteRecursively()
     //path.deleteIfExists()
   }

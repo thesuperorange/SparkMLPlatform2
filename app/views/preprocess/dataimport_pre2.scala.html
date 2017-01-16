@@ -147,11 +147,14 @@
 
                     for(i=0;i<pieData2.length;i++) {
                         if(pieData2[i].type =="StringType") {
+
                             d3.select('#piechart' + i).datum(pieData2[i].category).call(pie());
-                            d3.select('#barchart'+i).datum(pieData2[i].category).call(bar());
+                            d3.select('#barchart' + i).datum(pieData2[i].category).call(bar());
+                            console.log(pieData2[i].category)
                         }
                         else{
                             var data = pieData2[i].boxplot
+                            //console.log("piedata2",pieData2[i])
                             var boxplotData =[], count =0;
                             var d=[];
                             for (var property in data)
@@ -165,7 +168,7 @@
                                 boxplotData[j][1] = data[d[j]]
                             }
                             d3.select('#piechart' + i).datum(boxplotData).call(boxplot(count));
-
+                            //console.log(boxplotData)
                             d3.select('#barchart'+i).datum(pieData2[i].histogram).call(histogram());
 
 

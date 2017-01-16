@@ -22,5 +22,8 @@ object Utilities {
   val pre2Table = "Pre2"
   val userData = "userData"
   val path = "path"
+  //---------downloadpath
+
+  val Dpath = "/home/pzq317/Desktop/test"
 
 }

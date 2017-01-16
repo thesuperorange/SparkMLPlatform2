@@ -148,7 +148,7 @@ class Classification  @Inject()(val messagesApi: MessagesApi) extends Controller
               //temp  send mean back
               prediction.show
               delete
-              prediction.write.format("com.databricks.spark.csv").option("header",true).option("inferSchema", "true").csv("/home/pzq317/Desktop/test")
+              prediction.write.format("com.databricks.spark.csv").option("header",true).option("inferSchema", "true").csv(Utilities.Dpath)
 
 
               //result = prediction.select(mean($"prediction")).first.toString
@@ -196,7 +196,7 @@ class Classification  @Inject()(val messagesApi: MessagesApi) extends Controller
           val SparkSession = SPARK.getSession()
 
           try {
-            val prediction = SparkSession.read.csv("/home/pzq317/Desktop/test")
+            val prediction = SparkSession.read.csv(Utilities.Dpath)
             prediction.write.format("com.databricks.spark.csv").option("header",true).option("inferSchema", "true").csv(csvPath)
 
 
@@ -215,7 +215,7 @@ class Classification  @Inject()(val messagesApi: MessagesApi) extends Controller
   }
   def delete {
     //val path: Path = Path ("/home/pzq317/Desktop/SparkMLPlatform2/NULL")
-    val path = Path.fromString("/home/pzq317/Desktop/test")
+    val path = Path.fromString(Utilities.Dpath)
     path.deleteRecursively()
     //path.deleteIfExists()
   }

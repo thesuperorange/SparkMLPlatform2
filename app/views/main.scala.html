@@ -40,9 +40,14 @@
                 <!--Session.get("username");-->
             <div align="right">
             <h3>Hi @test</h3>
-            <a href="@routes.Entrance.signin()" >login</a>
-                <a href="@routes.Entrance.signup()" >Signup</a>
-                <a href="@routes.Entrance.logout()" >logout</a></div>
+                @if(test=="NULL"||test=="outsider"||test=="") {
+                    <a href="@routes.Entrance.signin()" >login</a>
+                }
+                @if(test!="NULL"&&test!="outsider"&&test!="") {
+                    <a href="@routes.Entrance.signup()" >Signup</a>
+                    <a href="@routes.Entrance.logout()" >logout</a>
+                }
+                </div>
             <div id="smoothmenu1" >
 
                 <ul >
@@ -67,7 +72,7 @@
                     }
 
                     <li><a href="#">Train Model</a>
-                        <ul >
+                        <ul>
                             <li><a href="@routes.Entrance.linear_reg_param()">LinearRegression</a></li>
                          <!--   <li><a href="routes.Entrance.simp_reg()">test</a></li>-->
 

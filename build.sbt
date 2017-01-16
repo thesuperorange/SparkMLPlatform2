@@ -19,7 +19,9 @@ libraryDependencies ++= {
     "org.apache.spark" %% "spark-mllib" % sparkV,
     "org.apache.spark" %% "spark-sql" % sparkV,
     "org.apache.spark" %% "spark-graphx" % sparkV,
-    "com.github.scala-incubator.io" %% "scala-io-file" % "0.4.3"
+    "com.github.scala-incubator.io" %% "scala-io-file" % "0.4.3",
+    "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4",
+    "net.liftweb" %% "lift-json" % "2.6.2"
 
   )
 }

@@ -47,7 +47,8 @@ class Preprocess @Inject()(db: Database)(val messagesApi: MessagesApi) extends C
         var datatype: Array[(String, String)] =Array()
         var boundForm: Form[StatSummary] = InputForms.summaryForm
         var finalString=org.json4s.jackson.renderJValue("")
-
+        var err:Boolean= true
+        var errmessage = ""
         try {
           println("path",path)
 
@@ -119,20 +120,28 @@ class Preprocess @Inject()(db: Database)(val messagesApi: MessagesApi) extends C
           case e: Exception => {
             // Ok(html.error(e.toString))   //useless
             println("error in preprocess:" + e)
-
+            errmessage = "error in preprocess:" + e
             SPARK.closeAll()
+            err=false
           }
+
         } finally {
           SPARK.closeAll()
+          //Ok(html.preprocess.dataimport_pre1(null,null,InputForms.InputParam.fill(path,false),header.toString,datatype, boundForm, pretty(finalString),jeffrey))
 
         }
-        Ok(html.preprocess.dataimport_pre1(null,null,InputForms.InputParam.fill(path,false),header.toString,datatype, boundForm, pretty(finalString),jeffrey))
-      }
+        if(err==true) {
+          Ok(html.preprocess.dataimport_pre1(null, null, InputForms.InputParam.fill(path, false), header.toString, datatype, boundForm, pretty(finalString), jeffrey))
+        }else{
+          Ok(html.showtext(errmessage,jeffrey))
+        }
+
+        }
 
     )
     }else{
     InputForms.guestSelect.bindFromRequest.fold(
-      formWithErrors => BadRequest("error"), { case (file,header) =>
+      formWithErrors => BadRequest("error"), { case (file, header) =>
 
         var jeffrey = ""
         //var path = ""
@@ -141,21 +150,22 @@ class Preprocess @Inject()(db: Database)(val messagesApi: MessagesApi) extends C
         }.getOrElse {
           jeffrey = "NULL"
         }
-        println("NLname",file)
+        println("NLname", file)
         val DB = new DatabaseCon(db)
 
         var path = DB.getPath(file)
-        println("path",path)
-        val SPARK = new SparkConfCreator(Utilities.master,this.getClass.getSimpleName)
+        println("path", path)
+        val SPARK = new SparkConfCreator(Utilities.master, this.getClass.getSimpleName)
 
         val sc = SPARK.getSC()
         val sparkSession = SPARK.getSession()
 
 
-        var datatype: Array[(String, String)] =Array()
+        var datatype: Array[(String, String)] = Array()
         var boundForm: Form[StatSummary] = InputForms.summaryForm
-        var finalString=org.json4s.jackson.renderJValue("")
-
+        var finalString = org.json4s.jackson.renderJValue("")
+        var err: Boolean = true
+        var errmessage = ""
         try {
 
 
@@ -165,30 +175,34 @@ class Preprocess @Inject()(db: Database)(val messagesApi: MessagesApi) extends C
             .csv(path)
 
 
-          datatype= df.dtypes
-          val columnNames =df.columns
+          datatype = df.dtypes
+          val columnNames = df.columns
           df.show
-          val isStringArr = new Array[(Boolean,String)](df.columns.size)
+          val isStringArr = new Array[(Boolean, String)](df.columns.size)
 
-          datatype.zipWithIndex.foreach(x=> {
-            if ((x._1._2) == "StringType"){ isStringArr(x._2) = (true,x._1._1)}
-            else{isStringArr(x._2) = (false,x._1._1)}
+          datatype.zipWithIndex.foreach(x => {
+            if ((x._1._2) == "StringType") {
+              isStringArr(x._2) = (true, x._1._1)
+            }
+            else {
+              isStringArr(x._2) = (false, x._1._1)
+            }
           }
           )
 
 
           val rawData = sc.textFile(path)
 
-          val parseData = rawData.zipWithIndex.filter(_._2>2).map{line=>
+          val parseData = rawData.zipWithIndex.filter(_._2 > 2).map { line =>
             Vectors.dense(
-              line._1.trim.split(",").zipWithIndex.filter(x=> ( !isStringArr(x._2.toInt)._1  )).map(_._1.toDouble)
+              line._1.trim.split(",").zipWithIndex.filter(x => (!isStringArr(x._2.toInt)._1)).map(_._1.toDouble)
             )
           }
 
           val summaryResult: MultivariateStatisticalSummary = Statistics.colStats(parseData)
 
-          println("mean",summaryResult.mean)
-          val corMatrix =Statistics.corr(parseData)
+          println("mean", summaryResult.mean)
+          val corMatrix = Statistics.corr(parseData)
           //println("cor",corMatrix)
           //corMatrix.numCols
 
@@ -197,21 +211,23 @@ class Preprocess @Inject()(db: Database)(val messagesApi: MessagesApi) extends C
           //heat map
           val lM = corMatrix.toArray.grouped(corMatrix.numRows).toArray
           //println("Lm",lM)
-          for(i<-0 to lM.length-1){
-            var a=columnNames(i)
+          for (i <- 0 to lM.length - 1) {
+            var a = columnNames(i)
 
-            lM(i).foreach(x=>{val a = List(BigDecimal(x).setScale(3, BigDecimal.RoundingMode.HALF_UP).toDouble); })
+            lM(i).foreach(x => {
+              val a = List(BigDecimal(x).setScale(3, BigDecimal.RoundingMode.HALF_UP).toDouble);
+            })
 
             var list = List[Double]()
             lM(i).foreach(
-              x=> {
+              x => {
                 list = list :+ BigDecimal(x).setScale(3, BigDecimal.RoundingMode.HALF_UP).toDouble
               }
             )
             finalString = finalString merge org.json4s.jackson.renderJValue(a, list)
             //println(finalString)
           }
-          println("mean",summaryResult.mean)
+          println("mean", summaryResult.mean)
 
           val x = Map(
             "max" -> summaryResult.max.toString,
@@ -225,16 +241,23 @@ class Preprocess @Inject()(db: Database)(val messagesApi: MessagesApi) extends C
         }
         catch {
           case e: Exception => {
-            // Ok(html.error(e.toString))   //useless
+
             println("error in preprocess:" + e)
-            //Ok(html.preprocess.dataimport_pre1(InputForms.guestSelect, DB.getPathInfo(),InputForms.InputParam,null,null,null,null,jeffrey))
+            err = false
+            errmessage = "error in preprocess:" + e
             SPARK.closeAll()
           }
+
         } finally {
           SPARK.closeAll()
 
         }
-        Ok(html.preprocess.dataimport_pre1(null,null,InputForms.InputParam.fill(path,false),header.toString,datatype, boundForm, pretty(finalString),jeffrey))
+        if (err == true) {
+          Ok(html.preprocess.dataimport_pre1(null, null, InputForms.InputParam.fill(path, false), header.toString, datatype, boundForm, pretty(finalString), jeffrey))
+        }else{
+          Ok(html.showtext(errmessage,jeffrey))
+        }
+
       }
 
     )
@@ -253,7 +276,8 @@ class Preprocess @Inject()(db: Database)(val messagesApi: MessagesApi) extends C
         jeffrey = "NULL"
       }
       val SPARK = new SparkConfCreator(Utilities.master,this.getClass.getSimpleName)
-
+      var err:Boolean= true
+      var errmessage = ""
       //val sc =SPARK.getSC()
       var outputFolder = ""
 
@@ -316,13 +340,18 @@ class Preprocess @Inject()(db: Database)(val messagesApi: MessagesApi) extends C
       catch {
         case e: Exception => {
           println("error in selectFeatureResult:" + e)
+          err=false
+          errmessage ="error in selectFeatureResult:" + e
           SPARK.closeAll()
         }
       } finally {
         SPARK.closeAll()
       }
-
-      Ok(html.showtext(outputFolder+" saved successfully!",jeffrey))
+      if(err==true) {
+        Ok(html.showtext(outputFolder + " saved successfully!", jeffrey))
+      }else{
+        Ok(html.showtext(errmessage,jeffrey))
+      }
 
   }
 
@@ -343,7 +372,7 @@ class Preprocess @Inject()(db: Database)(val messagesApi: MessagesApi) extends C
         val SparkSession = SPARK.getSession()
         var jsonString =""
         try{
-          println("path::"+jeffrey)
+
           val df = SparkSession.read.load(jeffrey+"/"+path)
           jsonString = createJsonArray(df)
         } catch {
@@ -366,7 +395,8 @@ class Preprocess @Inject()(db: Database)(val messagesApi: MessagesApi) extends C
     InputForms.ImportDirect.bindFromRequest.fold(
       formWithErrors => BadRequest("error"), { case (inputFilename,header,outputFolder) =>
 
-
+        var err:Boolean = true
+        var errMessage = ""
         val SPARK = new SparkConfCreator(Utilities.master,this.getClass.getSimpleName)
         val SparkSession = SPARK.getSession()
         val DB = new DatabaseCon(db)
@@ -396,6 +426,8 @@ class Preprocess @Inject()(db: Database)(val messagesApi: MessagesApi) extends C
         } catch {
           case e: Exception => {
             println("error in selectFeatureResult:" + e)
+            err = false
+            errMessage = "error in selectFeatureResult:" + e
             SPARK.closeAll()
 
 
@@ -403,7 +435,11 @@ class Preprocess @Inject()(db: Database)(val messagesApi: MessagesApi) extends C
         } finally {
           SPARK.closeAll()
         }
-        Ok(html.showtext(outputFolder+" saved successfully!",jeffrey))
+        if(err==true) {
+          Ok(html.showtext(outputFolder + " saved successfully!", jeffrey))
+        }else{
+          Ok(html.showtext(errMessage, jeffrey))
+        }
       }
     )
   }
@@ -437,7 +473,7 @@ class Preprocess @Inject()(db: Database)(val messagesApi: MessagesApi) extends C
     })
     finalString = finalString.substring(0, finalString.length() - 2) + "}]"
 
-    println(finalString)
+   // println(finalString)
 
     return finalString
   }

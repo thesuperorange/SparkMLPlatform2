@@ -7,15 +7,23 @@ import org.apache.spark.ml.clustering.KMeans
 import org.apache.spark.ml.clustering.KMeansModel
 import org.apache.spark.ml.linalg.{DenseVector, Vector}
 import org.apache.spark.ml.regression.LinearRegressionModel
+import org.apache.spark.sql._
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, Controller}
 import views.html
 import org.apache.spark.sql.functions.udf
+//import org.json4s._
+//import org.json4s.JsonDSL._
+import net.liftweb.json._
+
+//import org.json4s.jackson.JsonMethods._
+
 import scalax.io.JavaConverters._
 import scalax.file.Path
 /**
   * Created by superorange on 9/19/16.
   */
+//case class iris(prediction: String, f0: String, f1: String,f2: String,f3: String,f4: String)
 class Clustering @Inject()(val messagesApi: MessagesApi) extends Controller with I18nSupport {
 
   def callKmeans= Action { implicit request =>
@@ -95,8 +103,12 @@ class Clustering @Inject()(val messagesApi: MessagesApi) extends Controller with
         } finally {
           sc.stop()
         }
-
-        Ok(html.mlModel.kmeans(InputForms.KmeansParam, null, center, JsonStr,jeffrey,x))
+        //count(JsonStr)
+        if(JsonStr.size<20000) {
+          Ok(html.mlModel.kmeans(InputForms.KmeansParam, null, center, count(JsonStr), jeffrey, x))
+        }else{
+          Ok(html.mlModel.kmeans(InputForms.KmeansParam, null, center, count(JsonStr), jeffrey, x))
+        }
       }
 
     )
@@ -133,7 +145,7 @@ class Clustering @Inject()(val messagesApi: MessagesApi) extends Controller with
             res = prediction.select("prediction").rdd.map(r=>r(0).toString).collect
 
             delete
-            prediction.write.format("com.databricks.spark.csv").option("header",true).option("inferSchema", "true").csv("/home/pzq317/Desktop/test")
+            prediction.write.format("com.databricks.spark.csv").option("header",true).option("inferSchema", "true").csv(Utilities.Dpath)
 
           }
           catch {
@@ -144,7 +156,7 @@ class Clustering @Inject()(val messagesApi: MessagesApi) extends Controller with
           } finally {
             SPARK.closeAll()
           }
-          println(result)
+
           if(result=="") {
             Ok(html.mlTrans.kmeans(InputForms.ModelParam,InputForms.download, null, null, res,null,jeffrey))
           }
@@ -152,6 +164,38 @@ class Clustering @Inject()(val messagesApi: MessagesApi) extends Controller with
             Ok(html.mlTrans.kmeans(InputForms.ModelParam, null, null, null, null,result,jeffrey))
           }
       })
+  }
+
+
+  def count(JsonString:String): String={
+    implicit val formats = DefaultFormats
+    case class iris(prediction: String, f0: String, f1: String,f2: String,f3: String,f4: String)
+    val SPARK = new SparkConfCreator(Utilities.master,this.getClass.getSimpleName)
+    val SparkSession = SPARK.getSession()
+    val sc = SPARK.getSC()
+    //var jS = org.json4s.jackson.renderJValue("")
+    try {
+      /*val rdd = sc.parallelize(Seq(JsonString))
+      val df = SparkSession.read.json(rdd)
+      df.show()*/
+      /*jS = jS merge org.json4s.jackson.renderJValue(JsonString)
+      println(jS)*/
+      var js =JsonParser.parse(JsonString)
+      val m = js.extract[iris]
+      println(m.prediction)
+
+      //df.select("prediction").show()
+
+    }catch {
+      case e: Exception => {
+        //println("error in meanSquaredError:" + e)
+        SPARK.closeAll()
+      }
+    } finally {
+      SPARK.closeAll()
+    }
+    return "sss"
+
   }
   def download = Action{implicit request =>
     InputForms.download.bindFromRequest.fold(
@@ -170,7 +214,7 @@ class Clustering @Inject()(val messagesApi: MessagesApi) extends Controller with
           val SparkSession = SPARK.getSession()
 
           try {
-            val prediction = SparkSession.read.csv("/home/pzq317/Desktop/test")
+            val prediction = SparkSession.read.csv(Utilities.Dpath)
             prediction.write.format("com.databricks.spark.csv").option("header",true).option("inferSchema", "true").csv(csvPath)
 
 
@@ -189,7 +233,7 @@ class Clustering @Inject()(val messagesApi: MessagesApi) extends Controller with
   }
   def delete {
     //val path: Path = Path ("/home/pzq317/Desktop/SparkMLPlatform2/NULL")
-    val path = Path.fromString("/home/pzq317/Desktop/test")
+    val path = Path.fromString(Utilities.Dpath)
     path.deleteRecursively()
     //path.deleteIfExists()
   }
