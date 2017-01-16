@@ -12,8 +12,8 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, Controller}
 import views.html
 import org.apache.spark.sql.functions.udf
-//import org.json4s._
-//import org.json4s.JsonDSL._
+import org.json4s._
+import org.json4s.JsonDSL._
 import net.liftweb.json._
 
 //import org.json4s.jackson.JsonMethods._
@@ -105,7 +105,7 @@ class Clustering @Inject()(val messagesApi: MessagesApi) extends Controller with
         }
         //count(JsonStr)
         if(JsonStr.size<20000) {
-          Ok(html.mlModel.kmeans(InputForms.KmeansParam, null, center, count(JsonStr), jeffrey, x))
+          Ok(html.mlModel.kmeans(InputForms.KmeansParam, null, center, JsonStr, jeffrey, x))
         }else{
           Ok(html.mlModel.kmeans(InputForms.KmeansParam, null, center, count(JsonStr), jeffrey, x))
         }
@@ -173,16 +173,16 @@ class Clustering @Inject()(val messagesApi: MessagesApi) extends Controller with
     val SPARK = new SparkConfCreator(Utilities.master,this.getClass.getSimpleName)
     val SparkSession = SPARK.getSession()
     val sc = SPARK.getSC()
-    //var jS = org.json4s.jackson.renderJValue("")
+    var jS = org.json4s.jackson.renderJValue("")
     try {
       /*val rdd = sc.parallelize(Seq(JsonString))
       val df = SparkSession.read.json(rdd)
       df.show()*/
-      /*jS = jS merge org.json4s.jackson.renderJValue(JsonString)
-      println(jS)*/
-      var js =JsonParser.parse(JsonString)
-      val m = js.extract[iris]
-      println(m.prediction)
+      jS = jS merge org.json4s.jackson.renderJValue(JsonString)
+      println(jS)
+      //var js =JsonParser.parse(JsonString)
+      //val m = js.extract[iris]
+      //println(m.prediction)
 
       //df.select("prediction").show()
 
