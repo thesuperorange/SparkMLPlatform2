@@ -168,7 +168,7 @@ class Clustering @Inject()(val messagesApi: MessagesApi) extends Controller with
 
 
   def count(JsonString:String): String={
-    implicit val formats = DefaultFormats
+    //implicit val formats = DefaultFormats
     case class iris(prediction: String, f0: String, f1: String,f2: String,f3: String,f4: String)
     val SPARK = new SparkConfCreator(Utilities.master,this.getClass.getSimpleName)
     val SparkSession = SPARK.getSession()
