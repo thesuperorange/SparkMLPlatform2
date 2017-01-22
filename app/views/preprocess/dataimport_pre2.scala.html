@@ -1,31 +1,45 @@
 @import helper._
 
 @(csvInput: Form[(String)], pre2data: List[String],jsonString: String,user:String)(implicit messages: Messages)
-    @main(title = "Linear Regression",test = user) {
+    @main(title = "Data import -- preprocess2",test = user) {
 
 
-        <h3>Data Preprocess 2</h3>
+        <h2>Data Preprocess2</h2>
+
         @if(jsonString==null ){
+        <div class="row">
+            <div class="col-md-5">
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Choose from Database</h3>
+
+                    </div>
+                    <div class="panel-body">
+
+
             @form(action = routes.Preprocess.preprocess2) {
-
-                <fieldset>
-
-                    <legend>from SQL</legend>
-
+                <div class="form-group">
 
                     @select(
                         field = csvInput("path"),
                         options(pre2data),
-                        '_label -> "Select your parquet name")
+                        '_class->"col-sm-offset-1 col-sm-10",
+                        '_showConstraints -> false,
+                        '_label -> "Parquet name")
 
-
-
-                    <div class="submit">
-                        <input type="submit" id="submit" value="submit">
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-offset-1 col-sm-10">
+                        <button type="submit" class="btn btn-default">submit</button>
                     </div>
-                </fieldset>
+                </div>
+
 
             }
+                    </div>
+                </div>
+            </div>
+        </div>
         }
         @if(pre2data==null ){
             <script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
@@ -39,8 +53,8 @@
             <script src="@routes.Assets.at("javascripts/d3/box.js")"></script>
             <script src="@routes.Assets.at("javascripts/d3/histo.js")"></script>
 
-            <h2> Feature Visualization</h2>
-            <h3>Choose one column as your label and save it!</h3>
+            <h3> Feature Visualization</h3>
+            <h4>Choose one column as your label and save it!</h4>
             <script>
 
                     var form = document.createElement("form");
@@ -49,20 +63,22 @@
 
 
                     var inputFilename = document.createElement("input");
-                    inputFilename.type='hidden'
-                    inputFilename.value='@csvInput("path").value'
-                    inputFilename.name = 'inputFile'
+                    inputFilename.type='hidden';
+                    inputFilename.value='@csvInput("path").value';
+                    inputFilename.name = 'inputFile';
                     form.appendChild(inputFilename);
 
 
                     var pieData2 = @Html(jsonString)
 
                     var table = document.createElement('table');
-                    table.setAttribute('class','table-style-three')
+                    table.setAttribute('class','table table-inverse table-striped ');
+
+                    var thead = document.createElement('thead');
 
                     var tr1 = document.createElement('tr');
                     var column_num = 6;
-                    var header = ['column name','type','chart','chart','feature','label']
+                    var header = ['column name','type','chart','chart','feature','label'];
                     var th=[];
                     for(i=0;i<column_num;i++)
                     {
@@ -70,7 +86,10 @@
                         th[i].appendChild(document.createTextNode(header[i]));
                         tr1.appendChild(th[i]);
                     }
-                    table.appendChild(tr1);
+                    thead.appendChild(tr1);
+                    table.appendChild(thead);
+
+                    var tbody = document.createElement('tbody');
 
                     for (var i = 0; i < pieData2.length; i++){
                         if(pieData2[i]==undefined) break;
@@ -96,35 +115,36 @@
                         content[3].id = 'barchart'+i;
                         //radio
                         content[4] = document.createElement('input');
-                        content[4].type = "radio"
+                        content[4].type = "radio";
                         content[4].name= pieData2[i].columnName;
-                        content[4].value='feature'
+                        content[4].value='feature';
                         content[4].setAttribute("checked", "checked");
                         //radio
                         content[5] = document.createElement('input');
-                        content[5].type = "radio"
+                        content[5].type = "radio";
                         content[5].name= pieData2[i].columnName;
-                        content[5].value='label'
+                        content[5].value='label';
 
                         for(j=0;j<column_num;j++)
                         {
                             td[j] .appendChild(content[j]);
                             tr2.appendChild(td[j]);
                         }
-
-                        table.appendChild(tr2);
+                        tbody.appendChild(tr2);
+                       // table.appendChild(tr2);
                     }
 
-                    form.appendChild(table)
+                    table.appendChild(tbody);
+                    form.appendChild(table);
 
 
                     form.appendChild(document.createElement("br"));
                     @if(user!="NULL"&&user!="outsider"&&user!="") {
                         form.appendChild(document.createTextNode("Output name"));
                         var outputPath = document.createElement("input");
-                        outputPath.type='text'
-                        outputPath.required='required'
-                        outputPath.name = 'outputFolder'
+                        outputPath.type='text';
+                        outputPath.required='required';
+                        outputPath.name = 'outputFolder';
                         form.appendChild(outputPath);
                     }
                     form.appendChild(document.createElement("br"));
@@ -133,16 +153,19 @@
 
                     @if(user!="NULL"&&user!="outsider"&&user!="") {
                         var button = document.createElement("input");
-                        button.type='submit'
-                        button.id='saveto'
-                        button.value='save'
+                        button.type='submit';
+                        button.id='saveto';
+                        button.value='save';
                         form.appendChild(button);
                     }
 
 
 
+                    var container=document.createElement("div");
+                    container.className='container';
+                    container.appendChild(form);
 
-                    document.body.appendChild(form);
+                    document.body.appendChild(container);
 
 
                     for(i=0;i<pieData2.length;i++) {
@@ -153,7 +176,7 @@
                             console.log(pieData2[i].category)
                         }
                         else{
-                            var data = pieData2[i].boxplot
+                            var data = pieData2[i].boxplot;
                             //console.log("piedata2",pieData2[i])
                             var boxplotData =[], count =0;
                             var d=[];

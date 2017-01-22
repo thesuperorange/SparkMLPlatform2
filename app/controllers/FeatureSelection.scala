@@ -19,7 +19,7 @@ import scalax.file.Path
 class FeatureSelection @Inject()(val messagesApi: MessagesApi) extends Controller with I18nSupport {
 
   def callPCA = Action { implicit request =>
-	var jeffrey = ""
+	var jeffrey = "";
         request.session.get("username").map { user =>
           jeffrey = user
         }.getOrElse {
@@ -80,10 +80,10 @@ class FeatureSelection @Inject()(val messagesApi: MessagesApi) extends Controlle
          x = timestamp.toString
         }
         catch {
-          case e: Exception => {
+          case e: Exception =>
             println("error in meanSquaredError:" + e)
             SPARK.closeAll()
-          }
+
         } finally {
 
           SPARK.closeAll()
@@ -137,10 +137,10 @@ class FeatureSelection @Inject()(val messagesApi: MessagesApi) extends Controlle
               }
             }
             catch {
-              case e: Exception => {
+              case e: Exception =>
                 println("error in meanSquaredError:" + e)
                 SPARK.closeAll()
-              }
+
             } finally {
               SPARK.closeAll()
             }
@@ -161,6 +161,8 @@ class FeatureSelection @Inject()(val messagesApi: MessagesApi) extends Controlle
       }, {
         case (csvPath) =>
           var jeffrey = ""
+          var err=false
+          var errMessage=""
           request.session.get("username").map { user =>
             jeffrey = user
           }.getOrElse {
@@ -176,14 +178,21 @@ class FeatureSelection @Inject()(val messagesApi: MessagesApi) extends Controlle
 
           }
           catch {
-            case e: Exception => {
-              println("error in meanSquaredError:" + e)
+            case e: Exception =>
+              err=true
+              errMessage=e.toString()
+
               SPARK.closeAll()
-            }
+
           } finally {
             SPARK.closeAll()
           }
-          Ok("file downloaded")
+          if(err) {
+            Ok(html.showtext(errMessage, jeffrey,4))
+
+          }else{
+            Ok(html.showtext("file downloaded",jeffrey,1))
+          }
 
       })
   }

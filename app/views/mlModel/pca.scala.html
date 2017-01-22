@@ -6,27 +6,44 @@
   @main(title = "PCA",test = user) {
 
 
-    <h3>Principal Component Analysis</h3>
+    <h2>Principal Component Analysis</h2>
     @if(parquetlist != null) {
-      @form(action = routes.FeatureSelection.callPCA()) {
-        <fieldset>
+        <div class="row">
+            <div class="col-md-5">
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Input Parameters</h3>
 
-          <legend>Input Parameters</legend>
+                    </div>
+                    <div class="panel-body">
+      @form(action = routes.FeatureSelection.callPCA()) {
+          <div class="form-group">
           @select(
             field = myForm("path"),
             options(parquetlist),
+              '_class->"col-sm-offset-1 col-sm-10",
             '_label -> "Select your parquet name")
-
+            </div>
+          <div class="form-group">
           @inputText(
             field = myForm("k").copy(value=Some("36")),
-            args = '_label -> "k", 'placeholder -> "3"
+            args = '_label -> "k",
+              '_class->"col-sm-offset-1 col-sm-10",
+              'placeholder -> "3"
           )
 
-          <div class="submit">
-            <input type="submit" id="submit" value="submit">
           </div>
-        </fieldset>
+
+          <div class="form-group">
+              <div class="col-sm-offset-1 col-sm-10">
+                  <button type="submit" class="btn btn-default">submit</button>
+              </div>
+          </div>
       }
+                    </div>
+                </div>
+            </div>
+        </div>
     }
 
     @if(result != null) {
@@ -41,15 +58,11 @@
       </script>
         @if(user!="NULL"){
             @form(action = routes.Simple.saveModel) {
-<<<<<<< HEAD
 
-                <input type="text" name="outputFolder" required="required"> <br>
-                <input type="hidden" name ="timestamp" value=@timestamp ><br>
-=======
                 <h3>Save Model as: </h3>
-                <input type="text" name="outputFolder" value="PCAModel"> <br>
+                <input type="text" name="outputFolder" required="required" value="PCAModel"> <br>
                 <input type="hidden" name ="timestamp" value="NULL" ><br>
->>>>>>> 3d8d556ccd9e53f3b5e8213d2f0405bcc40575b9
+
                 <input type="hidden" name = "type" value="@Utilities.pcaModel" ><br>
 
                 <p class="buttons">

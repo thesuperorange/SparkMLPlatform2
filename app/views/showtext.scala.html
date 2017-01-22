@@ -1,6 +1,25 @@
-@(result:String,user:String)(implicit messages: Messages)
+@(result:String,user:String,msgtype:Int)(implicit messages: Messages)
 
 @main(title = "Message ", test = user) {
+@if(msgtype==1) {
+    <div class="alert alert-success">
+        <strong>[Success] </strong> @result
+    </div>
+}
+    @if(msgtype==2) {
+        <div class="alert alert-info">
+            <strong>[Info] </strong> @result
+        </div>
+    }
+    @if(msgtype==3) {
+        <div class="alert alert-warning">
+            <strong>[Warn] </strong>  @result
+        </div>
+    }
+    @if(msgtype==4) {
+        <div class="alert alert-danger">
+       <strong>[Error] </strong> @result
+        </div>
+    }
 
-  @result
 }

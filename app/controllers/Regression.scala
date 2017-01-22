@@ -42,7 +42,7 @@ class Regression @Inject()(val messagesApi: MessagesApi) extends Controller with
         val SPARK = new SparkConfCreator(Utilities.master,this.getClass.getSimpleName)
         val SparkSession = SPARK.getSession()
 
-        var x=new RegressionModel(null,0,null,null,0,0,0,null,null,null,null,null)
+        var x= RegressionModel(null,0,null,null,0,0,0,null,null,null,null,null)
         try {
 
 
@@ -109,18 +109,18 @@ class Regression @Inject()(val messagesApi: MessagesApi) extends Controller with
          x = RegressionModel(SimpleCompute.coef(coefficients), intercept, pValues, coefficientStandardErrors, meanSquaredError, totalIter, timestamp, resStr, predStr, labelStr,boxJson,histJson)
         }
         catch {
-          case e: Exception => {
+          case e: Exception =>
             SPARK.closeAll()
             error=true
             println("error in Linear Regression"+e)
 
-          }
+
         } finally {
           SPARK.closeAll()
         }
 
         if(error){
-        Ok(html.showtext("error in Linear Regression",jeffrey))}
+        Ok(html.showtext("error in Linear Regression",jeffrey,4))}
         else {
 
           Ok(html.mlModel.linearRegression(InputForms.elasticInput, null, x,jeffrey))
@@ -149,7 +149,9 @@ class Regression @Inject()(val messagesApi: MessagesApi) extends Controller with
         val SPARK = new SparkConfCreator(Utilities.master,this.getClass.getSimpleName)
         val SparkSession = SPARK.getSession()
 
-        var result = ""
+          var err=false
+          var errMessage=""
+       // var result = ""
         var res = Array[String]()
         try {
           println(jeffrey,inputFilename)
@@ -177,26 +179,29 @@ class Regression @Inject()(val messagesApi: MessagesApi) extends Controller with
 
           }
           else {
-            result = "[Error] feature number is not consistent"
+            err=true
+            errMessage= " feature number is not consistent"
           }
 
 
         }
         catch {
-          case e: Exception => {
-            println("error in meanSquaredError:" + e)
+          case e: Exception =>
+            err=true
+            errMessage=e.toString()
            SPARK.closeAll()
-          }
+
         } finally {
           SPARK.closeAll()
         }
-        println(result)
-        if(result=="") {
-          Ok(html.mlTrans.regression_transform(InputForms.ModelParam,InputForms.download, null, null, res,null,jeffrey))
-        }
-          else{
-          Ok(html.mlTrans.regression_transform(InputForms.ModelParam, null, null, null, null,result,jeffrey))
-        }
+
+          if(err) {
+            Ok(html.showtext(errMessage, jeffrey,4))
+
+          }else{
+            Ok(html.mlTrans.regression_transform(InputForms.ModelParam,InputForms.download, null, null, res,null,jeffrey))
+          }
+
         })
 
   }
@@ -215,7 +220,8 @@ class Regression @Inject()(val messagesApi: MessagesApi) extends Controller with
             }
             val SPARK = new SparkConfCreator(Utilities.master,this.getClass.getSimpleName)
             val SparkSession = SPARK.getSession()
-
+            var err=false
+            var errMessage=""
             try {
               val prediction = SparkSession.read.csv(Utilities.Dpath)
               prediction.write.format("com.databricks.spark.csv").option("header",true).option("inferSchema", "true").csv(csvPath)
@@ -223,14 +229,21 @@ class Regression @Inject()(val messagesApi: MessagesApi) extends Controller with
 
             }
             catch {
-              case e: Exception => {
-                println("error in meanSquaredError:" + e)
+              case e: Exception =>
+                err = true
+                errMessage = e.toString()
+
                 SPARK.closeAll()
-              }
+
             } finally {
               SPARK.closeAll()
             }
-              Ok("file downloaded")
+            if(err) {
+              Ok(html.showtext(errMessage, jeffrey,4))
+
+            }else{
+              Ok(html.showtext("file downloaded",jeffrey,1))
+            }
 
         })
   }

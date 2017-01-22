@@ -4,32 +4,54 @@
 
     @main(title = "ImportData without Visulization",test = user) {
 
-        <h3>Data Preprocess Directly</h3>
+        <h2>Data Preprocess Directly</h2>
+    <div class="row">
+        <div class="col-md-5">
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Input Parameters</h3>
 
+                </div>
+                <div class="panel-body">
 
         @form(action = routes.Preprocess.preprocess_direct()) {
-            <fieldset>
-
-                <legend>Input Parameters</legend>
+            <div class="form-group">
                 @inputText(
                     csvInput("inputpath"),
                     '_label -> "CSV path",
+                    '_class->"col-sm-offset-1  col-sm-10",
                     'placeholder -> "path of your csv in hdfs"
                 )
+            </div>
+
+            <div class="form-group">
                 @checkbox(
                     csvInput("header"),
-                    /*'label->"Confirm:",'_text->"Is first line header?",*/'_help->""
+                    '_class->"col-sm-offset-1 col-sm-10",
+                    '_text->"Is first line header?",
+                    '_help->""
                 )
+            </div>
+
+            <div class="form-group">
                 @inputText(
                     csvInput("outputfolder"),
                     '_label -> "parquet output folder",
+                    '_class->"col-sm-offset-1  col-sm-10",
                     'placeholder -> "output name"
                 )
+            </div>
 
-                <div class="submit">
-                    <input type="submit" id="submit" value="submit">
+                <div class="form-group">
+                    <div class="col-sm-offset-1 col-sm-10">
+                        <button type="submit" class="btn btn-default">submit</button>
+                    </div>
                 </div>
-            </fieldset>
-        }
+
+}
+                </div>
+            </div>
+        </div>
+    </div>
     }
 

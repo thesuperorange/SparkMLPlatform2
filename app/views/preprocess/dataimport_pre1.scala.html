@@ -1,43 +1,78 @@
 @import helper._
-
 @(guestSelect: Form[(String,Boolean)],data:List[String],csvInput: Form[(String,Boolean)],header:String,datatype: Seq[(String, String)], summary: Form[StatSummary],corMatrix:String,user:String)(implicit messages: Messages)
 
-@main(title = "Input Radio Group Sample",test = user) {
 
-    <h3>Data Preprocess 1</h3>
-
+@main(title = "Data import--preprocess1",test = user) {
+    <h2>Data Preprocess1</h2>
 
     @if(datatype==null && summary==null && corMatrix ==null){
-        @form(action = routes.Preprocess.preprocess1_summary()) {
-            <fieldset>
-                @if(user!="NULL") {
-                    <legend>Input Parameters</legend>
-                    @inputText(
-                        csvInput("path"),
-                        '_label -> "CSV path",
-                        'placeholder -> "path of your csv in hdfs"
-                    )
-                    @checkbox(
-                        csvInput("header"),
-                        /*'label->"Confirm:",'_text->"Is first line header?",*/ '_help -> ""
-                    )
-                }else{
-                    @select(
-                        guestSelect("file"),
-                        options(data),
-                        '_label -> "file")
-                    @checkbox(
-                        guestSelect("header"),
-                        /*'label->"Confirm:",'_text->"Is first line header?",*/ '_help -> ""
-                    )
 
-                }
-                <div class="submit">
-                    <input type="submit" id="submit" value="submit">
+        <div class="row">
+            <div class="col-md-5">
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Input Parameters</h3>
+
+                    </div>
+                    <div class="panel-body">
+
+                        @form(action = routes.Preprocess.preprocess1_summary(), 'class -> "form-horizontal") {
+
+                                @if(user!="NULL") {
+                                    <div class="form-group">
+
+                                        @inputText(
+                                            csvInput("path"),
+                                            '_label->"Csv path",
+                                            '_class->"col-sm-offset-1  col-sm-10",
+                                            'placeholder -> "path of your csv in hdfs"
+                                        )
+                                    </div>
+
+                                    <div class="form-group">
+                                    @checkbox(
+                                        csvInput("header"),
+                                        '_class->"col-sm-offset-1 col-sm-10",
+                                        '_text->"Is first line header?",
+                                       /* '_label -> null,*/
+                                        '_help -> ""
+                                    )
+                                    </div>
+                                }else{
+                                    <div class="form-group">
+                                    @select(
+                                        guestSelect("file"),
+                                        options(data),
+                                        '_class->"col-sm-offset-1 col-sm-10",
+                                        '_showConstraints -> false,
+                                        '_label -> "file")
+                                    </div>
+                                    <div class="form-group">
+                                    @checkbox(
+
+                                        guestSelect("header"),
+                                        '_class->"col-sm-offset-1 col-sm-10",
+                                        '_text->"Is first line header?",
+                                       /* '_label -> null,*/
+                                        '_help -> ""
+                                    )
+                                    </div>
+
+                                }
+                                <div class="form-group">
+                                    <div class="col-sm-offset-1 col-sm-10">
+                                        <button type="submit" class="btn btn-default">submit</button>
+                                    </div>
+                                </div>
+
+
+                        }
+                    </div>
                 </div>
-            </fieldset>
-        }
+            </div>
+        </div>
     }
+
 
     @if(datatype!=null && summary!=null && corMatrix !=null){
         <script src="@routes.Assets.at("javascripts/d3/correlation.js")"></script>
@@ -45,7 +80,7 @@
 
 
         @if(corMatrix.size<5000) {
-        <h2> Correlation Matrix</h2>
+        <h3> Correlation Matrix</h3>
 
 
         <b>InputFile Path: </b> @csvInput("path").value
@@ -63,9 +98,15 @@
         </script>
 
         <br>
-        <h2> Statistical Summary</h2>
-        <h3> Convert column type and save it!</h3>
+        <h3> Statistical Summary</h3>
+        <h4> Convert column type and save it!</h4>
+
+
+
         <script>
+
+
+
 
                 var form = document.createElement("form");
                 form.method='POST';
@@ -73,31 +114,33 @@
 
 
                 var inputFilename = document.createElement("input");
-                inputFilename.type='hidden'
-                inputFilename.value='@csvInput("path").value'
-                inputFilename.name = 'inputFile'
+                inputFilename.type='hidden';
+                inputFilename.value='@csvInput("path").value';
+                inputFilename.name = 'inputFile';
                 form.appendChild(inputFilename);
 
 
                 var header = document.createElement("input");
-                header.type='hidden'
-                header.value='@header'
-                header.name = 'header'
+                header.type='hidden';
+                header.value='@header';
+                header.name = 'header';
                 form.appendChild(header);
 
-                var mean = @summary.get.mean
-                var max = @summary.get.max
-                var min = @summary.get.min
-                var variance = @summary.get.variance
-                var numNonzeros = @summary.get.numNonzeros
+                var mean = @summary.get.mean;
+                var max = @summary.get.max;
+                var min = @summary.get.min;
+                var variance = @summary.get.variance;
+                var numNonzeros = @summary.get.numNonzeros;
 
 
                 var table = document.createElement('table');
-                table.setAttribute('class','table-style-three')
+                table.setAttribute('class','table table-inverse table-striped ');
+
+                var thead = document.createElement('thead');
                 // table.class="table-style-three"
                 var tr1 = document.createElement('tr');
 
-                var colName = ['column name','max','mean','min','var','nonZeros','category','numeric','removal']
+                var colName = ['column name','max','mean','min','var','nonZeros','category','numeric','removal'];
                 var th=[];
                 for(i=0;i<colName.length;i++)
                 {
@@ -105,21 +148,25 @@
                     th[i].appendChild(document.createTextNode(colName[i]));
                     tr1.appendChild(th[i]);
                 }
-                table.appendChild(tr1);
+                thead.appendChild(tr1);
+                table.appendChild(thead);
 
 
                 var headerArray=new Array();
 
 
+                var tbody = document.createElement('tbody');
 
 
 
                 @for( (item, index) <- datatype.zipWithIndex) {
 
-                var i=@index
+                var i=@index;
                         headerArray.push("@item._1");
 
                 var tr2 = document.createElement('tr');
+              //  tr2.setAttribute('class','info')
+
                 var td=[];
                 for(j=0;j<colName.length;j++)
                 {
@@ -146,9 +193,9 @@
                 //div category  input radio, label
                 var div = document.createElement('div');
                 content[6] = document.createElement('input');
-                content[6].type = "radio"
+                content[6].type = "radio";
                 content[6].name= "@item._1";
-                content[6].value='category'
+                content[6].value='category';
                 @if(item._2 != "IntegerType" && item._2 != "DoubleType") {
                 content[6].setAttribute("checked", "checked");
                 }
@@ -157,20 +204,20 @@
                 //div category  input radio, label
                 //var div = document.createElement('div');
                 content[7] = document.createElement('input');
-                content[7].type = "radio"
+                content[7].type = "radio";
                 content[7].name= "@item._1";
-                content[7].value='numeric'
+                content[7].value='numeric';
                 @if(item._2 == "IntegerType" || item._2 == "DoubleType") {
                 content[7].setAttribute("checked", "checked"); } else{
                 content[7].setAttribute("disabled", "disabled");
                 }
                 content[8] = document.createElement('input');
-                content[8].type = "radio"
+                content[8].type = "radio";
                 content[8].name= "@item._1";
-                content[8].value='removal'
+                content[8].value='removal';
 
 
-                td[6].appendChild(div)
+                td[6].appendChild(div);
 
                 for(j=0;j<colName.length;j++)
                 {
@@ -179,18 +226,19 @@
                 }
 
 
-                table.appendChild(tr2);
+                tbody.appendChild(tr2);
                 }
 
+                table.appendChild(tbody);
 
                 form.appendChild(table);
 
                 form.appendChild(document.createElement("br"));
                 form.appendChild(document.createTextNode("Output name"));
                 var outputPath = document.createElement("input");
-                outputPath.type='text'
-                outputPath.required = 'required'
-                outputPath.name = 'outputFolder'
+                outputPath.type='text';
+                outputPath.required = 'required';
+                outputPath.name = 'outputFolder';
                 form.appendChild(outputPath);
 
                 form.appendChild(document.createElement("br"));
@@ -198,14 +246,23 @@
 
 
 
-                var button = document.createElement("input");
-                button.type='submit'
-                button.id='saveto'
-                button.value='save'
+                var button = document.createElement("button");
+                var t = document.createTextNode("SAVE");
+                button.type='submit';
+               // button.id='saveto'
+                //button.value='save'
+
+                button.setAttribute('class','btn btn-default');
+                button.appendChild(t);
                 form.appendChild(button);
 
+                var container=document.createElement("div");
+                container.className='container';
+                container.appendChild(form);
 
-                document.body.appendChild(form);
+                document.body.appendChild(container);
+
+
 
 
                 // alert(headerArray);

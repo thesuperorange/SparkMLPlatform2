@@ -62,7 +62,7 @@ class Classification  @Inject()(val messagesApi: MessagesApi) extends Controller
           //receiver-operating characteristic
           val roc = binarySummary.roc // FPR  TPR
           val areaUnderROC = binarySummary.areaUnderROC //double
-          binarySummary.predictions
+         // binarySummary.predictions
           //precision & recall
           binarySummary.pr
           binarySummary.precisionByThreshold //precision   threshold
@@ -98,10 +98,10 @@ class Classification  @Inject()(val messagesApi: MessagesApi) extends Controller
 
         }
         catch {
-          case e: Exception => {
+          case e: Exception =>
             println("error in meanSquaredError:" + e)
             sc.stop()
-          }
+
         } finally {
           sc.stop()
         }
@@ -129,7 +129,8 @@ class Classification  @Inject()(val messagesApi: MessagesApi) extends Controller
           val SPARK = new SparkConfCreator(Utilities.master,this.getClass.getSimpleName)
           val SparkSession = SPARK.getSession()
 
-          var result = ""
+          var err=false
+          var errMessage=""
           var res = Array[String]()
           try {
             println(jeffrey,model,inputFilename)
@@ -156,26 +157,28 @@ class Classification  @Inject()(val messagesApi: MessagesApi) extends Controller
 
             }
             else {
-              result = "[Error] feature number is not consistent"
+              err=true
+              errMessage= "feature number is not consistent"
             }
 
 
           }
           catch {
-            case e: Exception => {
-              println("error in meanSquaredError:" + e)
+            case e: Exception =>
+              err=true
+              errMessage= e.toString
               SPARK.closeAll()
-            }
+
           } finally {
             SPARK.closeAll()
           }
-          println(result)
-          if(result=="") {
+          if(err) {
+            Ok(html.showtext(errMessage, jeffrey,4))
+
+          }else{
             Ok(html.mlTrans.log_transform(InputForms.ModelParam,InputForms.download, null, null, res,null,jeffrey))
           }
-          else{
-            Ok(html.mlTrans.log_transform(InputForms.ModelParam, null, null, null, null,result,jeffrey))
-          }
+
       })
 
   }
@@ -202,10 +205,10 @@ class Classification  @Inject()(val messagesApi: MessagesApi) extends Controller
 
           }
           catch {
-            case e: Exception => {
+            case e: Exception =>
               println("error in meanSquaredError:" + e)
               SPARK.closeAll()
-            }
+
           } finally {
             SPARK.closeAll()
           }

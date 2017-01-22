@@ -2,35 +2,50 @@
 @import util.Utilities
 @(param: Form[(String, String)],down: Form[(String)], pre2data: List[String], model: List[String], regResult: Array[String], errorMessage: String, user:String)(implicit messages: Messages)
 @main(title = "Linear Regression",test = user) {
-
+    <h2>PCA</h2>
   @if(pre2data != null) {
-    <h3>PCA</h3>
+
+    <div class="row">
+      <div class="col-md-5">
+        <div class="panel panel-primary">
+          <div class="panel-heading">
+            <h3 class="panel-title">Input Parameters</h3>
+
+          </div>
+          <div class="panel-body">
     @form(action = routes.FeatureSelection.pca_trans()) {
-      <fieldset>
-
-        <legend>Input Parameters</legend>
-
-
+      <div class="form-group">
         @select(
           field = param("inputpath"),
           options(pre2data),
+          '_class->"col-sm-offset-1 col-sm-10",
           '_label -> "Select your parquet name")
-
+</div>
+      <div class="form-group">
         @select(
           field = param("model"),
           options(model),
+          '_class->"col-sm-offset-1 col-sm-10",
           '_label -> "Select your model name")
 
-        <div class="submit">
-          <input type="submit" id="submit" value="submit">
+      </div>
+
+      <div class="form-group">
+        <div class="col-sm-offset-1 col-sm-10">
+          <button type="submit" class="btn btn-default">submit</button>
         </div>
-      </fieldset>
+      </div>
 
     }
+          </div>
+        </div>
+      </div>
+    </div>
   }
 
   @if(regResult != null) {
-    <h2>pcaFeatures</h2>
+
+    <h3>data preview</h3>
     @for(i <- 0 to 3) {
       <br>
       Column@i| @regResult(i)
@@ -39,20 +54,24 @@
     ....and @(regResult.length-4) more
     <br>
     @if(user!="NULL"&&user!="outsider"&&user!="") {
+        <h3>Download your result</h3>
     @form(action = routes.Regression.download()) {
-      <fieldset>
-        <legend>download your result</legend>
+      <div class="form-group">
         @inputText(
           field = down("csvPath"),
-          '_label -> "Input your download path"
-        )
+          '_label -> "Input your download path",
+            '_showConstraints -> false
 
-        <div class="submit">
-          <input type="submit" id="submit" value="download">
-        </div>
-      </fieldset>
+        )
+</div>
+      <div class="form-group">
+
+          <button type="submit" class="btn btn-default">submit</button>
+
+      </div>
 
     }
+
   }
   }
 }

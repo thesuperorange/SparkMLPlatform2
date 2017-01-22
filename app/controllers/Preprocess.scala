@@ -64,7 +64,7 @@ class Preprocess @Inject()(db: Database)(val messagesApi: MessagesApi) extends C
           val isStringArr = new Array[(Boolean,String)](df.columns.size)
 
           datatype.zipWithIndex.foreach(x=> {
-            if ((x._1._2) == "StringType"){ isStringArr(x._2) = (true,x._1._1)}
+            if (x._1._2 == "StringType"){ isStringArr(x._2) = (true,x._1._1)}
             else{isStringArr(x._2) = (false,x._1._1)}
           }
           )
@@ -74,7 +74,7 @@ class Preprocess @Inject()(db: Database)(val messagesApi: MessagesApi) extends C
 
           val parseData = rawData.zipWithIndex.filter(_._2>2).map{line=>
             Vectors.dense(
-              line._1.trim.split(",").zipWithIndex.filter(x=> ( !isStringArr(x._2.toInt)._1  )).map(_._1.toDouble)
+              line._1.trim.split(",").zipWithIndex.filter(x=>  !isStringArr(x._2.toInt)._1  ).map(_._1.toDouble)
             )
           }
 
@@ -117,23 +117,23 @@ class Preprocess @Inject()(db: Database)(val messagesApi: MessagesApi) extends C
           boundForm = InputForms.summaryForm.bind(x)
         }
         catch {
-          case e: Exception => {
+          case e: Exception =>
             // Ok(html.error(e.toString))   //useless
             println("error in preprocess:" + e)
             errmessage = "error in preprocess:" + e
             SPARK.closeAll()
             err=false
-          }
+
 
         } finally {
           SPARK.closeAll()
           //Ok(html.preprocess.dataimport_pre1(null,null,InputForms.InputParam.fill(path,false),header.toString,datatype, boundForm, pretty(finalString),jeffrey))
 
         }
-        if(err==true) {
+        if(err) {
           Ok(html.preprocess.dataimport_pre1(null, null, InputForms.InputParam.fill(path, false), header.toString, datatype, boundForm, pretty(finalString), jeffrey))
         }else{
-          Ok(html.showtext(errmessage,jeffrey))
+          Ok(html.showtext(errmessage,jeffrey,4))
         }
 
         }
@@ -181,7 +181,7 @@ class Preprocess @Inject()(db: Database)(val messagesApi: MessagesApi) extends C
           val isStringArr = new Array[(Boolean, String)](df.columns.size)
 
           datatype.zipWithIndex.foreach(x => {
-            if ((x._1._2) == "StringType") {
+            if (x._1._2 == "StringType") {
               isStringArr(x._2) = (true, x._1._1)
             }
             else {
@@ -195,7 +195,7 @@ class Preprocess @Inject()(db: Database)(val messagesApi: MessagesApi) extends C
 
           val parseData = rawData.zipWithIndex.filter(_._2 > 2).map { line =>
             Vectors.dense(
-              line._1.trim.split(",").zipWithIndex.filter(x => (!isStringArr(x._2.toInt)._1)).map(_._1.toDouble)
+              line._1.trim.split(",").zipWithIndex.filter(x => !isStringArr(x._2.toInt)._1).map(_._1.toDouble)
             )
           }
 
@@ -215,7 +215,7 @@ class Preprocess @Inject()(db: Database)(val messagesApi: MessagesApi) extends C
             var a = columnNames(i)
 
             lM(i).foreach(x => {
-              val a = List(BigDecimal(x).setScale(3, BigDecimal.RoundingMode.HALF_UP).toDouble);
+              val a = List(BigDecimal(x).setScale(3, BigDecimal.RoundingMode.HALF_UP).toDouble)
             })
 
             var list = List[Double]()
@@ -240,22 +240,22 @@ class Preprocess @Inject()(db: Database)(val messagesApi: MessagesApi) extends C
           boundForm = InputForms.summaryForm.bind(x)
         }
         catch {
-          case e: Exception => {
+          case e: Exception =>
 
             println("error in preprocess:" + e)
             err = false
             errmessage = "error in preprocess:" + e
             SPARK.closeAll()
-          }
+
 
         } finally {
           SPARK.closeAll()
 
         }
-        if (err == true) {
+        if (err) {
           Ok(html.preprocess.dataimport_pre1(null, null, InputForms.InputParam.fill(path, false), header.toString, datatype, boundForm, pretty(finalString), jeffrey))
         }else{
-          Ok(html.showtext(errmessage,jeffrey))
+          Ok(html.showtext(errmessage,jeffrey,4))
         }
 
       }
@@ -299,12 +299,12 @@ class Preprocess @Inject()(db: Database)(val messagesApi: MessagesApi) extends C
         request.body.asFormUrlEncoded.get.foreach {
           //request.queryString.foreach {
           case (key, value) =>
-            if (key == "inputFile") inputFilename = value(0)
-            else if (key == "outputFolder") outputFolder = value(0)
-            else if (key == "header") header = value(0)
+            if (key == "inputFile") inputFilename = value.head
+            else if (key == "outputFolder") outputFolder = value.head
+            else if (key == "header") header = value.head
             // else if(value(0)=="numeric")numericCol+key
-            else if (value(0) == "category") categoryCol = key :: categoryCol
-            else if (value(0) == "removal") dropCol = key :: dropCol
+            else if (value.head == "category") categoryCol = key :: categoryCol
+            else if (value.head == "removal") dropCol = key :: dropCol
             //println(key + " " + value(0))
         }
 
@@ -338,19 +338,19 @@ class Preprocess @Inject()(db: Database)(val messagesApi: MessagesApi) extends C
 
       }
       catch {
-        case e: Exception => {
+        case e: Exception =>
           println("error in selectFeatureResult:" + e)
           err=false
           errmessage ="error in selectFeatureResult:" + e
           SPARK.closeAll()
-        }
+
       } finally {
         SPARK.closeAll()
       }
-      if(err==true) {
-        Ok(html.showtext(outputFolder + " saved successfully!", jeffrey))
+      if(err) {
+        Ok(html.showtext(outputFolder + " saved successfully!", jeffrey,1))
       }else{
-        Ok(html.showtext(errmessage,jeffrey))
+        Ok(html.showtext(errmessage,jeffrey,4))
       }
 
   }
@@ -371,21 +371,29 @@ class Preprocess @Inject()(db: Database)(val messagesApi: MessagesApi) extends C
         val SPARK = new SparkConfCreator(Utilities.master,this.getClass.getSimpleName)
         val SparkSession = SPARK.getSession()
         var jsonString =""
+        var err:Boolean= false
+        var errmessage = ""
         try{
 
           val df = SparkSession.read.load(jeffrey+"/"+path)
           jsonString = createJsonArray(df)
         } catch {
-          case e: Exception => {
-            println("error in selectFeatureResult:" + e)
+          case e: Exception =>
+            err=true
+            errmessage= e.toString
             SPARK.closeAll()
-          }
+
         } finally {
           SPARK.closeAll()
         }
 
+        if(err) {
+          Ok(html.showtext(errmessage,jeffrey,4))
 
-        Ok(html.preprocess.dataimport_pre2(InputForms.csvPathIn.fill(jeffrey+"/"+path), null,jsonString,jeffrey))
+        }else{
+          Ok(html.preprocess.dataimport_pre2(InputForms.csvPathIn.fill(jeffrey+"/"+path), null,jsonString,jeffrey))
+        }
+
       }
     )
   }
@@ -424,21 +432,21 @@ class Preprocess @Inject()(db: Database)(val messagesApi: MessagesApi) extends C
 
 
         } catch {
-          case e: Exception => {
+          case e: Exception =>
             println("error in selectFeatureResult:" + e)
             err = false
             errMessage = "error in selectFeatureResult:" + e
             SPARK.closeAll()
 
 
-          }
+
         } finally {
           SPARK.closeAll()
         }
-        if(err==true) {
-          Ok(html.showtext(outputFolder + " saved successfully!", jeffrey))
+        if(err) {
+          Ok(html.showtext(outputFolder + " saved successfully!", jeffrey,1))
         }else{
-          Ok(html.showtext(errMessage, jeffrey))
+          Ok(html.showtext(errMessage, jeffrey,4))
         }
       }
     )
@@ -475,7 +483,7 @@ class Preprocess @Inject()(db: Database)(val messagesApi: MessagesApi) extends C
 
    // println(finalString)
 
-    return finalString
+     finalString
   }
   //-------------pre2   convert vector
 
@@ -490,7 +498,9 @@ class Preprocess @Inject()(db: Database)(val messagesApi: MessagesApi) extends C
       var inputFilename = ""
       var outputFolder = ""
       var labelColumn = ""
-      var labelTag = true;
+      var labelTag = true
+      var err=false
+      var errMessage=""
       //val user = request.session.get("username").get
       var jeffrey = ""
       request.session.get("username").map { user =>
@@ -501,49 +511,67 @@ class Preprocess @Inject()(db: Database)(val messagesApi: MessagesApi) extends C
       //var convStringCol:List[String]=List()
       //var categoryCol:List[String]=List()
       //var dropCol:List[String]=List()
-      request.body.asFormUrlEncoded.get.foreach {
-        case (key, value) =>
-          if (key == "inputFile") inputFilename = value(0)
-          else if (key == "outputFolder") outputFolder = value(0)
-          // else if(value(0)=="numeric")numericCol+key
-          else if (value(0) == "label") labelColumn = key
-          //else if(value(0)=="removal")dropCol=key::dropCol
-          println(key + " " + value(0))
-      }
-
-
-      var DF = SparkSession.read.load(inputFilename)
-
-
-      // val dftypes :Array[(String,String)]= tempdf.dtypes
-
-      DF.dtypes.foreach(x => {
-        if (x._2 == "StringType") {
-          if (x._1 == labelColumn) labelColumn += "Index"
-          val indexer1 = new StringIndexer().setInputCol(x._1).setOutputCol(x._1 + "Index")
-          DF = indexer1.fit(DF).transform(DF).drop(x._1)
+      try {
+        request.body.asFormUrlEncoded.get.foreach {
+          case (key, value) =>
+            if (key == "inputFile") inputFilename = value.head
+            else if (key == "outputFolder") outputFolder = value.head
+            // else if(value(0)=="numeric")numericCol+key
+            else if (value.head == "label") labelColumn = key
+            //else if(value(0)=="removal")dropCol=key::dropCol
+            println(key + " " + value.head)
         }
-      })
-
-      val header = DF.columns.filter(line => line != (labelColumn))
-      val assembler = new VectorAssembler().setInputCols(header).setOutputCol("features")
-      var transformed = assembler.transform(DF)
 
 
-      if (labelColumn == "") {
-        transformed = transformed.select("features")
-        labelTag = false
+        var DF = SparkSession.read.load(inputFilename)
+
+
+        // val dftypes :Array[(String,String)]= tempdf.dtypes
+
+        DF.dtypes.foreach(x => {
+          if (x._2 == "StringType") {
+            if (x._1 == labelColumn) labelColumn += "Index"
+            val indexer1 = new StringIndexer().setInputCol(x._1).setOutputCol(x._1 + "Index")
+            DF = indexer1.fit(DF).transform(DF).drop(x._1)
+          }
+        })
+
+        val header = DF.columns.filter(line => line != labelColumn)
+        val assembler = new VectorAssembler().setInputCols(header).setOutputCol("features")
+        var transformed = assembler.transform(DF)
+
+
+        if (labelColumn == "") {
+          transformed = transformed.select("features")
+          labelTag = false
+        }
+        else transformed = transformed.withColumn("label", transformed(labelColumn).cast(DoubleType)).select("features", "label")
+
+        transformed.write.parquet(jeffrey + "/" + outputFolder)
+
+        //insert into sql
+        DB.insertPre2(outputFolder, inputFilename, labelTag, jeffrey)
       }
-      else transformed = transformed.withColumn("label", transformed(labelColumn).cast(DoubleType)).select("features", "label")
+      catch {
+        case e: Exception =>
 
-      transformed.write.parquet(jeffrey+"/"+outputFolder)
+          err = true
+          errMessage =  e.toString
+          SPARK.closeAll()
 
-      //insert into sql
-      DB.insertPre2(outputFolder, inputFilename, labelTag,jeffrey)
 
-      SPARK.closeAll()
 
-      Ok(html.showtext(outputFolder,jeffrey))
+      } finally {
+        SPARK.closeAll()
+      }
+      if(err) {
+        Ok(html.showtext(errMessage, jeffrey,4))
+
+      }else{
+        Ok(html.showtext(outputFolder,jeffrey,1))
+      }
+
+
 
   }
 }

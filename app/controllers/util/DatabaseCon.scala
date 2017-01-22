@@ -21,12 +21,12 @@ class DatabaseCon(db: Database) {
       val rs = stmt.executeQuery("SELECT * from " + tablename +" where id = "+"'"+user+"'" )
       if (rs.next()){
         println("user exist try another one")
-        return true
+         true
       }
       else{
         //println("success")
         stmt.executeUpdate("INSERT INTO " + tablename + " VALUES ('" + user + "','" + email + "','"+ password + "')")
-        return false
+         false
       }
       //stmt.executeUpdate("INSERT INTO " + tablename + " VALUES ('" + user + "','" + email + "','"+ password + "')");
 
@@ -73,9 +73,9 @@ class DatabaseCon(db: Database) {
     try {
       val stmt = conn.createStatement
 
-      stmt.executeUpdate("delete from " + tablename1 + " where users = 'NULL'" );
-      stmt.executeUpdate("delete from " + tablename2 + " where users = 'NULL'" );
-      stmt.executeUpdate("delete from " + tablename3 + " where users = 'NULL'" );
+      stmt.executeUpdate("delete from " + tablename1 + " where users = 'NULL'" )
+      stmt.executeUpdate("delete from " + tablename2 + " where users = 'NULL'" )
+      stmt.executeUpdate("delete from " + tablename3 + " where users = 'NULL'" )
 
     } finally {
       conn.close()
@@ -127,7 +127,7 @@ class DatabaseCon(db: Database) {
     } finally {
       conn.close()
     }
-    return dbname
+     dbname
   }
 
 
@@ -144,7 +144,7 @@ class DatabaseCon(db: Database) {
     } finally {
       conn.close()
     }
-    return dbname
+     dbname
   }
 
   def getPre2Info(users:String,withLabel: Boolean): List[String] = {
@@ -173,7 +173,35 @@ class DatabaseCon(db: Database) {
     } finally {
       conn.close()
     }
-    return dbname
+     dbname
+  }
+  def getPre2Info(users:String): List[String] = {
+    val tablename = Utilities.pre2Table
+    val conn = db.getConnection()
+    var dbname = List[String]()
+    try {
+      val stmt = conn.createStatement
+      //println(users)
+      if(users =="NULL") {
+        //println("SELECT * from " + tablename + " where users='" + users +"'"+" AND label = "+ withLabel )
+        val rs = stmt.executeQuery("SELECT * from " + tablename + " where users='" + users +"'" )
+        while (rs.next()) {
+          dbname = rs.getString("name") :: dbname
+        }
+      }
+      else{
+        //val rs = stmt.executeQuery("SELECT * from " + tablename + " where users='" + users +"AND label = '" + withLabel + "'")
+        val rs = stmt.executeQuery("SELECT * from " + tablename + " where users='" + users +"'"  )
+        while (rs.next()) {
+          dbname = rs.getString("name") :: dbname
+        }
+      }
+
+
+    } finally {
+      conn.close()
+    }
+     dbname
   }
 
 
@@ -192,7 +220,7 @@ class DatabaseCon(db: Database) {
     } finally {
       conn.close()
     }
-    return dbname
+     dbname
   }
   def getPathInfo(user:String): List[String] = {
     val tablename = Utilities.path
@@ -208,7 +236,7 @@ class DatabaseCon(db: Database) {
     } finally {
       conn.close()
     }
-    return dbname
+     dbname
   }
 
   def getPath(name:String): String = {
@@ -226,7 +254,7 @@ class DatabaseCon(db: Database) {
     } finally {
       conn.close()
     }
-    return pa
+     pa
   }
 
 

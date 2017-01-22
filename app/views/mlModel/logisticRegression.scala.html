@@ -2,43 +2,64 @@
 @import util.Utilities
 @(param: Form[(String, String, String, String)], pre2data: List[String], regResult: logRegModel,user:String)(implicit messages: Messages)
     @main(title = "Logistic Regression",test = user) {
-
+    <h2>Logistic Regression</h2>
         @if(pre2data != null) {
+            <div class="row">
+                <div class="col-md-5">
+                    <div class="panel panel-primary">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">Input Parameters</h3>
+
+                        </div>
+                        <div class="panel-body">
             @form(action = routes.Classification.callLogistic()) {
 
-                <h3>Logistic Regression</h3>
 
-
-                <fieldset>
-
-                    <legend>Input Parameters</legend>
-
+                <div class="form-group">
                     @select(
                         field = param("inputpath"),
                         options(pre2data),
+                        '_class->"col-sm-offset-1 col-sm-10",
                         '_label -> "Select your parquet name")
-                    @**inputText(
-                    field = param("inputpath"),
-                    args = '_label -> "Regression -- csv path", 'placeholder -> "inputpath"
-                    )**@
+                   </div>
+                <div class="form-group">
                     @inputText(
                         field = param("maxIter").copy(value = Some("10")),
-                        args = '_label -> "MaxIter", 'placeholder -> "10", 'value -> "10"
+                        args = '_label -> "MaxIter",
+                        '_class->"col-sm-offset-1 col-sm-10",
+                        'placeholder -> "10",
+                        'value -> "10"
                     )
+                </div>
+                <div class="form-group">
                     @inputText(
                         field = param("regParam").copy(value = Some("0.3")),
-                        args = '_label -> "Reg Param", 'placeholder -> "0.3", 'value -> "0.3"
+                        args = '_label -> "Reg Param",
+                        '_class->"col-sm-offset-1 col-sm-10",
+                        'placeholder -> "0.3",
+                        'value -> "0.3"
                     )
+                </div>
+                <div class="form-group">
                     @inputText(
                         field = param("elaParam").copy(value = Some("0.8")),
-                        args = '_label -> "Elastic Param", 'placeholder -> "0.8", 'value -> "0.8"
+                        args = '_label -> "Elastic Param",
+                        '_class->"col-sm-offset-1 col-sm-10",
+                        'placeholder -> "0.8",
+                        'value -> "0.8"
                     )
-                    <div class="submit">
-                        <input type="submit" id="submit" value="submit">
+                </div>
+                    <div class="form-group">
+                        <div class="col-sm-offset-1 col-sm-10">
+                            <button type="submit" class="btn btn-default">submit</button>
+                        </div>
                     </div>
-                </fieldset>
 
             }
+                            </div>
+                        </div>
+                    </div>
+                </div>
         }
 
         @if(regResult != null) {
@@ -52,17 +73,18 @@
             </style>
             <script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
             <link rel="stylesheet" type="text/css" href="@routes.Assets.at("stylesheets/d3/roc.css")">
-            <h2>Logistic Regression</h2>
-            <h3>Coefficient</h3>
-            <div class="col-sm-6" id="coef">  </div><br>
 
+            <h3>Coefficient</h3>
+            <div id="coef">  </div><br>
+
+            <div id="coeftable">  </div><br>
             <script>
 
                     var coef = @Html(regResult.coefficients);
                     d3.select('#coef' ).datum(coef).call(bar());
                     //--------coefficient table-----------------------------
                     var table = document.createElement('table');
-                    table.setAttribute('class','table-style-three')
+                    table.setAttribute('class','table table-inverse table-striped');
 
                     //thead
                     var tr1 = document.createElement('tr');
@@ -78,7 +100,10 @@
                         th[i].appendChild(document.createTextNode(coef[i-1]['coef']));
                         tr1.appendChild(th[i]);
                     }
-                    table.appendChild(tr1);
+                    var thead = document.createElement('thead');
+                    thead.appendChild(tr1);
+                    table.appendChild(thead);
+                    var tbody = document.createElement('tbody');
 
                     var tr2 = document.createElement('tr');
                     var td=[];
@@ -91,16 +116,23 @@
                         td[i].appendChild(document.createTextNode(coef[i-1]['count']));
                         tr2.appendChild(td[i]);
                     }
-                    table.appendChild(tr2);
-                    document.body.appendChild(table);
+                    tbody.appendChild(tr2);
+                    table.appendChild(tbody);
+                    var container=document.createElement("div");
+                    container.className='container';
+                    container.appendChild(table);
+
+                    var coeftable = document.getElementById("coeftable");
+                    coeftable.appendChild(container);
+                   // document.body.appendChild(table);
             </script>
             <br>
             <h3>ROC Curve</h3>
             <h4>area under ROC = @regResult.areaUnderROC</h4>
-            <div class="col-sm-12" id="ROC"></div>   <br>
+            <div id="ROC"></div>   <br>
 
             <h3>TPR FPR  F-measurement</h3>
-            <div class="col-sm-12" id="c2486"></div>   <br>
+            <div id="c2486"></div>   <br>
 
 
 
@@ -130,19 +162,18 @@
 
             @if(user!="NULL"){
                 @form(action = routes.Simple.saveModel) {
-<<<<<<< HEAD
 
-                    <input type="text" name="outputFolder" required="required"> <br>
-=======
                     <h3>Save Model as: </h3>
-                    <input type="text" name="outputFolder" value="logRegModel"> <br>
->>>>>>> 3d8d556ccd9e53f3b5e8213d2f0405bcc40575b9
+                    <input type="text" name="outputFolder" value="logRegModel" required="required"> <br>
+
                     <input type="hidden" name ="timestamp" value="@regResult.timestamp" ><br>
                     <input type="hidden" name = "type" value="@Utilities.logisticModel" ><br>
 
-                    <p class="buttons">
-                    <input type="submit" id="submit">
-                    </p>
+
+                            <button type="submit" class="btn btn-default">submit</button>
+
+
+
                 }
 
             }

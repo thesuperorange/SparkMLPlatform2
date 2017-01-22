@@ -1,0 +1,6 @@
+
+.table-striped>thead{color: #ffffff;background-color: #77c3fb;}
+.table-striped>tbody>tr:nth-child(even)>td,
+.table-striped>tbody>tr:nth-child(even)>th {
+    background-color: #edf5fb;
+}

@@ -16,52 +16,80 @@
   }
   </style>
 
+    <h2>Linear Regression</h2>
+
   @if(pre2data != null) {
+      <div class="row">
+          <div class="col-md-5">
+              <div class="panel panel-primary">
+                  <div class="panel-heading">
+                      <h3 class="panel-title">Input Parameters</h3>
 
-    <h3>Linear Regression</h3>
+                  </div>
+                  <div class="panel-body">
+
     @form(action = routes.Regression.callRegression,'class -> "registration_form") {
-
-
-
-      <fieldset>
-
-        <legend>Input Parameters</legend>
+        <div class="form-group">
         @select(
           field = param("inputpath"),
           options(pre2data),
+            '_class->"col-sm-offset-1 col-sm-10",
+            '_showConstraints -> false,
           '_label -> "Select your parquet name")
-        @**inputText(
-        field = param("inputpath"),
-        args = '_label -> "Regression -- csv path", 'placeholder -> "inputpath"
-        )**@
+        </div>
+
+        <div class="form-group">
         @inputText(
         //param("maxIter").copy(value=Some("10")),
           field = param("maxIter").copy(value = Some("10")),
-          args = '_label -> "MaxIter",  'placeholder -> "10",'value -> "10"
+          args = '_label -> "MaxIter",
+            '_class->"col-sm-offset-1 col-sm-10",
+            'placeholder -> "10",
+            'value -> "10"
         )
+        </div>
+
+        <div class="form-group">
         @inputText(
           field = param("regParam").copy(value = Some("0.3")),
 
-          args = '_label -> "Reg Param", 'placeholder -> "0.3", 'value -> "0.3"
+          args = '_label -> "Reg Param",
+            '_class->"col-sm-offset-1 col-sm-10",
+            'placeholder -> "0.3",
+            'value -> "0.3"
         )
+        </div>
+
+        <div class="form-group">
         @inputText(
           field = param("elaParam").copy(value = Some("0.8")),
-          args = '_label -> "Elastic Param", 'placeholder -> "0.8", 'value -> "0.8"
+          args = '_label -> "Elastic Param",
+            '_class->"col-sm-offset-1 col-sm-10",
+            'placeholder -> "0.8",
+            'value -> "0.8"
         )
 
-
-        <div class="submit">
-          <input type="submit" id="submit" value="submit">
         </div>
-      </fieldset>
+
+            <div class="form-group">
+                <div class="col-sm-offset-1 col-sm-10">
+                    <button type="submit" class="btn btn-default">submit</button>
+                </div>
+            </div>
     }
+                      </div>
+              </div>
+          </div>
+      </div>
 
   }
 
   @if(regResult != null) {
-    <h2>Linear Regression</h2>
-    <h3>Coefficient</h3>
-    <div class="col-sm-6" id="coef">  </div><br>
+
+    <h3>Coefficients</h3>
+    <div  id="coef">  </div><br>
+
+      <div id="coeftable">  </div><br>
 
     <script>
 
@@ -69,8 +97,9 @@
             d3.select('#coef' ).datum(coef).call(bar());
             //--------coefficient table-----------------------------
             var table = document.createElement('table');
-            table.setAttribute('class','table-style-three')
+            table.setAttribute('class','table table-inverse table-striped ');
 
+            var thead = document.createElement('thead');
             //thead
             var tr1 = document.createElement('tr');
             var column_num = coef.length+1;
@@ -85,7 +114,9 @@
               th[i].appendChild(document.createTextNode(coef[i-1]['coef']));
               tr1.appendChild(th[i]);
             }
-            table.appendChild(tr1);
+            thead.appendChild(tr1);
+            table.appendChild(thead);
+            var tbody = document.createElement('tbody');
 
             var tr2 = document.createElement('tr');
             var td=[];
@@ -98,23 +129,31 @@
               td[i].appendChild(document.createTextNode(coef[i-1]['count']));
               tr2.appendChild(td[i]);
             }
-            table.appendChild(tr2);
-            document.body.appendChild(table);
+            tbody.appendChild(tr2);
+            table.appendChild(tbody);
+
+            var container=document.createElement("div");
+            container.className='container';
+            container.appendChild(table);
+
+            var coeftable = document.getElementById("coeftable");
+            coeftable.appendChild(container);
+            //document.body.appendChild(container);
     </script>
 
     <h3>Scatter Plot: Residual </h3>
-    <div class="col-sm-6" id="scatter">  </div><br>
+    <div id="scatter">  </div><br>
     <h3>Scatter Plot: Real x Prediction </h3>
-    <div class="col-sm-6" id="scatter2">  </div><br>
+    <div  id="scatter2">  </div><br>
     <h3>Residual Histogram </h3>
-    <div class="col-sm-6" id="reshist">  </div><br>
+    <div  id="reshist">  </div><br>
     <h3>Residual Boxplot </h3>
-    <div class="col-sm-6" id="resbox">  </div><br>
+    <div  id="resbox">  </div><br>
     <script>
     //-------------------------------------
     var residual_label={
       "label":@regResult.labelJson ,
-      "residual": @regResult.residualJson}
+      "residual": @regResult.residualJson};
 
     //tag 2 horizontal
     d3.select('#scatter').datum(residual_label).call(scatter(2));
@@ -122,7 +161,7 @@
 
     var label_predict={
       "label":@regResult.labelJson ,
-      "prediction": @regResult.predictionJson}
+      "prediction": @regResult.predictionJson};
 
     d3.select('#scatter2').datum(label_predict).call(scatter(1));
 
@@ -130,7 +169,7 @@
     var resHistJson =@Html(regResult.resHistJson)
             d3.select('#reshist').datum(resHistJson).call(histogram());
 
-    var data = @Html(regResult.resBoxJson)
+    var data = @Html(regResult.resBoxJson);
     var boxplotData =[], count =0;
     var d=[];
     for (var property in data)
@@ -172,12 +211,8 @@
   @if(user!="NULL"){
     @form(action = routes.Simple.saveModel) {
 
-<<<<<<< HEAD
-      <input type="text" name="outputFolder" required="required"> <br>
-=======
         <h3>Save Model as: </h3>
-      <input type="text" name="outputFolder" value="lrModel"> <br>
->>>>>>> 3d8d556ccd9e53f3b5e8213d2f0405bcc40575b9
+      <input type="text" name="outputFolder" value="lrModel" required="required"> <br>
       <input type="hidden" name ="timestamp" value="@regResult.timestamp" ><br>
       <input type="hidden" name = "type" value="@Utilities.linearModel" ><br>
 

@@ -31,25 +31,25 @@ class Simple @Inject()(db: Database)(val messagesApi: MessagesApi) extends Contr
           try {
             val DB = new DatabaseCon(db)
 
-            val dir = new File(jeffrey+"/"+modelType+"/"+timestamp);
-            val newName = new File(jeffrey+"/"+modelType+"/"+outputFolder);
+            val dir = new File(jeffrey+"/"+modelType+"/"+timestamp)
+            val newName = new File(jeffrey+"/"+modelType+"/"+outputFolder)
             println("rename from:" +jeffrey+"/"+modelType+"/"+timestamp+"  to: "+jeffrey+"/"+modelType+"/"+outputFolder)
 
             if ( dir.isDirectory() ) {
-              dir.renameTo(newName);
+              dir.renameTo(newName)
             } else {
-              dir.mkdir();
-              dir.renameTo(newName);
+              dir.mkdir()
+              dir.renameTo(newName)
             }
             DB.insertModel(outputFolder,modelType,jeffrey)
           }
           catch {
-            case e: Exception => {
+            case e: Exception =>
               println("error in save model:" + e)
 
-            }
+
           }
-          Ok(html.showtext("save to "+outputFolder+" successfully",jeffrey)) }
+          Ok(html.showtext("save to "+outputFolder+" successfully",jeffrey,1)) }
     )
 
   }

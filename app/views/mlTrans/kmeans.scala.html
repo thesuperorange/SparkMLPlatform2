@@ -4,29 +4,44 @@
 @main(title = "Linear Regression", test = user) {
 
   @if(pre2data != null) {
-    <h3>Kmeans</h3>
+    <h2>Kmeans</h2>
+    <div class="row">
+      <div class="col-md-5">
+        <div class="panel panel-primary">
+          <div class="panel-heading">
+            <h3 class="panel-title">Input Parameters</h3>
+
+          </div>
+          <div class="panel-body">
     @form(action = routes.Clustering.kmean_trans()) {
-      <fieldset>
-
-        <legend>Input Parameters</legend>
-
+      <div class="form-group">
 
         @select(
           field = param("inputpath"),
           options(pre2data),
+          '_class->"col-sm-offset-1 col-sm-10",
           '_label -> "Select your parquet name")
-
+      </div>
+      <div class="form-group">
         @select(
           field = param("model"),
           options(model),
+          '_class->"col-sm-offset-1 col-sm-10",
           '_label -> "Select your model name")
 
-        <div class="submit">
-          <input type="submit" id="submit" value="submit">
+      </div>
+
+      <div class="form-group">
+        <div class="col-sm-offset-1 col-sm-10">
+          <button type="submit" class="btn btn-default">submit</button>
         </div>
-      </fieldset>
+      </div>
 
     }
+          </div>
+        </div>
+      </div>
+    </div>
   }
 
   @if(regResult != null) {
