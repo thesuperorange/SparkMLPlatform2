@@ -9,6 +9,18 @@ import play.api.data.Forms._
   * Created by superorange on 9/6/16.
   */
 object InputForms {
+  val ckan = Form(
+    tuple(
+
+      "username" -> text,
+      "url" ->text,
+      "check"->text
+
+    )
+
+  )
+
+
   val download= Form(
 
       "csvPath" -> nonEmptyText

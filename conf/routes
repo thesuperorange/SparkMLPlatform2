@@ -4,7 +4,7 @@
 
 # Home page
 GET     /                       controllers.Entrance.index
-
+GET      /test                  controllers.Ckantest.test
 ### data preprocess
 GET     /dataimport_pre1        controllers.Entrance.dataimport_pre1
 POST     /preprocess1           controllers.Preprocess.preprocess1_summary
