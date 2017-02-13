@@ -70,11 +70,11 @@ class Preprocess @Inject()(db: Database)(val messagesApi: MessagesApi) extends C
           )
 
 
-          val rawData = sc.textFile(path)
+          val rawData = sc.textFile(path).filter(_.nonEmpty)
 
           val parseData = rawData.zipWithIndex.filter(_._2>2).map{line=>
             Vectors.dense(
-              line._1.trim.split(",").zipWithIndex.filter(x=>  !isStringArr(x._2.toInt)._1  ).map(_._1.toDouble)
+              line._1.replaceAll("\"", "").trim.split(",").zipWithIndex.filter(x=>  !isStringArr(x._2.toInt)._1  ).map(_._1.toDouble)
             )
           }
 
