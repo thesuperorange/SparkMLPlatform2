@@ -46,7 +46,7 @@ class Ckantest @Inject()(db: Database)(val messagesApi: MessagesApi) extends Con
 
 
           /** check md5 **/
-          if (!md5(username + url).equalsIgnoreCase(check)) {
+          if (!md5(username + url).takeRight(5).equalsIgnoreCase(check)) {
             err = true
             errMessage = "Sorry! Checksum mismatch."
           }
