@@ -59,8 +59,7 @@ class Preprocess @Inject()(db: Database)(val messagesApi: MessagesApi) extends C
 
 
           datatype= df.dtypes
-          val columnNames =df.columns
-          df.show
+          val columnNames = df.columns.map(x=>x.replaceAll(" ",""))
           val isStringArr = new Array[(Boolean,String)](df.columns.size)
 
           datatype.zipWithIndex.foreach(x=> {
