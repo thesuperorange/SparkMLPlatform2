@@ -307,12 +307,20 @@ class Preprocess @Inject()(db: Database)(val messagesApi: MessagesApi) extends C
             //println(key + " " + value(0))
         }
 
-        var tempdf = session.read
+        var inputdf = session.read
           .option("header", header) // Use first line of all files as header
           .option("inferSchema", "true") // Automatically infer data types
           .csv(inputFilename)
 
+        //change column name
+        var tempdf = inputdf
+        for(col <- inputdf.columns){
+          tempdf = tempdf.withColumnRenamed(col,col.replaceAll("\\s", ""))
+        }
+
         val dftypes: Array[(String, String)] = tempdf.dtypes
+
+        //change column name
 
         categoryCol.foreach { x =>
           if (dftypes.exists(_ ==(x, "IntegerType")) || dftypes.exists(_ ==(x, "DoubleType")))
