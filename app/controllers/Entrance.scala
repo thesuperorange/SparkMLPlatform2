@@ -12,6 +12,9 @@ import controllers.util.{DatabaseCon, InputForms, Utilities}
 
 import scala.text
 import java.net.URL
+
+import com.typesafe.config.ConfigFactory
+
 import scalax.io.JavaConverters._
 import scalax.file.Path
 
@@ -60,6 +63,8 @@ class Entrance @Inject()(db: Database)(val messagesApi: MessagesApi) extends Con
 
   //-------index
   def index = Action { request =>
+
+
     request.session.get("username").map { user =>
 
       Ok(html.index(user.toString))

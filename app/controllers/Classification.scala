@@ -39,7 +39,7 @@ class Classification  @Inject()(val messagesApi: MessagesApi) extends Controller
         try {
           println(inputFilename, maxIter, regParam, elaParam)
 
-          val df = SparkSession.read.load(jeffrey+"/"+inputFilename)
+          val df = SparkSession.read.load(Utilities.workingFolder+"/"+jeffrey+"/"+inputFilename)
           val lr = new LogisticRegression().setMaxIter(maxIter.toInt).setRegParam(regParam.toDouble).setElasticNetParam(elaParam.toDouble).setLabelCol("label").setFeaturesCol("features")
           val lrModel = lr.fit(df)
 
@@ -49,7 +49,7 @@ class Classification  @Inject()(val messagesApi: MessagesApi) extends Controller
 
           val timestamp: Long = System.currentTimeMillis
           if(jeffrey!="NULL") {
-            lrModel.save(jeffrey + "/" + Utilities.logisticModel + "/" + timestamp)
+            lrModel.save(Utilities.workingFolder+"/"+jeffrey + "/" + Utilities.logisticModel + "/" + timestamp)
           }
           val coefficients: Array[Double] = lrModel.coefficients.toArray
           val intercept: Double = lrModel.intercept
@@ -134,8 +134,8 @@ class Classification  @Inject()(val messagesApi: MessagesApi) extends Controller
           var res = Array[String]()
           try {
             println(jeffrey,model,inputFilename)
-            val df = SparkSession.read.load(jeffrey+"/"+inputFilename)
-            val lrmodel = LogisticRegressionModel.load(jeffrey + "/" + Utilities.logisticModel + "/" + model)
+            val df = SparkSession.read.load(Utilities.workingFolder+"/"+jeffrey+"/"+inputFilename)
+            val lrmodel = LogisticRegressionModel.load(Utilities.workingFolder+"/"+jeffrey + "/" + Utilities.logisticModel + "/" + model)
             val numModelFeatures = lrmodel.numFeatures
 
             val y = df.select("features").head

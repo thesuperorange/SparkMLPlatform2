@@ -44,7 +44,7 @@ class Clustering @Inject()(val messagesApi: MessagesApi) extends Controller with
         val SparkSession = SPARK.getSession()
         val sc = SPARK.getSC()
 	
-        val df = SparkSession.read.load(jeffrey+"/"+inputFilename)
+        val df = SparkSession.read.load(Utilities.workingFolder+"/"+jeffrey+"/"+inputFilename)
         var center: List[String] = List()
         var JsonStr = "{"
         var x = ""
@@ -58,7 +58,7 @@ class Clustering @Inject()(val messagesApi: MessagesApi) extends Controller with
 
           val timestamp: Long = System.currentTimeMillis
           if(jeffrey!="NULL") {
-            model.save(jeffrey + "/" + Utilities.kmeansModel + "/" + timestamp)
+            model.save(Utilities.workingFolder+"/"+jeffrey + "/" + Utilities.kmeansModel + "/" + timestamp)
           }
             // Shows the result
           println("Final Centers: ")
@@ -134,9 +134,9 @@ class Clustering @Inject()(val messagesApi: MessagesApi) extends Controller with
           var res = Array[String]()
           try {
             println(jeffrey,inputFilename, model)
-            val df = SparkSession.read.load(jeffrey+"/"+inputFilename)
+            val df = SparkSession.read.load(Utilities.workingFolder+"/"+jeffrey+"/"+inputFilename)
 
-            val kmeans = KMeansModel.load(jeffrey + "/" + Utilities.kmeansModel + "/" + model)
+            val kmeans = KMeansModel.load(Utilities.workingFolder+"/"+jeffrey + "/" + Utilities.kmeansModel + "/" + model)
             //val ans = kmeans.fit(df)
 
             println(kmeans.getFeaturesCol)

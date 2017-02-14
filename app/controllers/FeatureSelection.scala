@@ -39,7 +39,7 @@ class FeatureSelection @Inject()(val messagesApi: MessagesApi) extends Controlle
         var json = org.json4s.jackson.renderJValue("")
 
         try {
-          val df = SparkSession.read.load(jeffrey+"/"+inputFilename)
+          val df = SparkSession.read.load(Utilities.workingFolder+"/"+jeffrey+"/"+inputFilename)
 
           val pca = new PCA().setInputCol("features").setOutputCol("pcaFeatures").setK(k.toInt).fit(df)
           val pcaDF = pca.transform(df)
@@ -47,7 +47,7 @@ class FeatureSelection @Inject()(val messagesApi: MessagesApi) extends Controlle
           val timestamp: Long = System.currentTimeMillis
 
           if(jeffrey!="NULL") {
-            pca.save(jeffrey + "/" + Utilities.pcaModel + "/" + timestamp)
+            pca.save(Utilities.workingFolder+"/"+jeffrey + "/" + Utilities.pcaModel + "/" + timestamp)
           }
             //------
 
@@ -117,8 +117,8 @@ class FeatureSelection @Inject()(val messagesApi: MessagesApi) extends Controlle
             var res = Array[String]()
             try {
               println(jeffrey,inputFilename)
-              val df = SparkSession.read.load(jeffrey+"/"+inputFilename)
-              val pca = PCAModel.load(jeffrey + "/" + Utilities.pcaModel + "/" + model)
+              val df = SparkSession.read.load(Utilities.workingFolder+"/"+jeffrey+"/"+inputFilename)
+              val pca = PCAModel.load(Utilities.workingFolder+"/"+jeffrey + "/" + Utilities.pcaModel + "/" + model)
               val numFeatures= pca.pc.numRows
               val y = df.select("features").head
               val numDfFeatures = y(0).asInstanceOf[DenseVector].size

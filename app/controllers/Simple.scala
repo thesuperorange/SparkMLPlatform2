@@ -31,9 +31,9 @@ class Simple @Inject()(db: Database)(val messagesApi: MessagesApi) extends Contr
           try {
             val DB = new DatabaseCon(db)
 
-            val dir = new File(jeffrey+"/"+modelType+"/"+timestamp)
-            val newName = new File(jeffrey+"/"+modelType+"/"+outputFolder)
-            println("rename from:" +jeffrey+"/"+modelType+"/"+timestamp+"  to: "+jeffrey+"/"+modelType+"/"+outputFolder)
+            val dir = new File(Utilities.workingFolder+"/"+jeffrey+"/"+modelType+"/"+timestamp)
+            val newName = new File(Utilities.workingFolder+"/"+jeffrey+"/"+modelType+"/"+outputFolder)
+            println("rename from:" +Utilities.workingFolder+"/"+jeffrey+"/"+modelType+"/"+timestamp+"  to: "+Utilities.workingFolder+"/"+jeffrey+"/"+modelType+"/"+outputFolder)
 
             if ( dir.isDirectory() ) {
               dir.renameTo(newName)

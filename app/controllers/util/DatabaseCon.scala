@@ -261,7 +261,7 @@ class DatabaseCon(db: Database) {
   def insertModel(outputPathName:String, modelType: String, user:String)={
     //------sql connect------
     val conn = db.getConnection()
-    val tablename = "Model"
+    val tablename = Utilities.modelTable
     //println(outputPathName,modelType)
     try {
       val stmt = conn.createStatement

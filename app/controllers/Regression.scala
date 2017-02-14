@@ -46,7 +46,7 @@ class Regression @Inject()(val messagesApi: MessagesApi) extends Controller with
         try {
 
 
-        val training = SparkSession.read.load(jeffrey+"/"+inputFilename)
+        val training = SparkSession.read.load(Utilities.workingFolder+"/"+jeffrey+"/"+inputFilename)
         // val training = sqlContext.read.format("libsvm") .load(parquetName)
         //val lr = new LinearRegression().setLabelCol("label").setFeaturesCol("features")
         val lr = new LinearRegression().setMaxIter(maxIter.toInt).setRegParam(regParam.toDouble).setElasticNetParam(elaParam.toDouble)
@@ -59,7 +59,7 @@ class Regression @Inject()(val messagesApi: MessagesApi) extends Controller with
 
         val timestamp: Long = System.currentTimeMillis
         if(jeffrey!="NULL") {
-          lrModel.save(jeffrey + "/" + Utilities.linearModel + "/" + timestamp)
+          lrModel.save(Utilities.workingFolder+"/"+jeffrey + "/" + Utilities.linearModel + "/" + timestamp)
         }
         val trainingSummary = lrModel.summary
 
@@ -155,8 +155,8 @@ class Regression @Inject()(val messagesApi: MessagesApi) extends Controller with
         var res = Array[String]()
         try {
           println(jeffrey,inputFilename)
-          val df = SparkSession.read.load(jeffrey+"/"+inputFilename)
-          val lrmodel = LinearRegressionModel.load(jeffrey + "/" + Utilities.linearModel + "/" + model)
+          val df = SparkSession.read.load(Utilities.workingFolder+"/"+jeffrey+"/"+inputFilename)
+          val lrmodel = LinearRegressionModel.load(Utilities.workingFolder+"/"+jeffrey + "/" + Utilities.linearModel + "/" + model)
           val numModelFeatures = lrmodel.numFeatures
 
           val y = df.select("features").head

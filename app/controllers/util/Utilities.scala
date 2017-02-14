@@ -1,13 +1,15 @@
 package controllers.util
 
+import com.typesafe.config.ConfigFactory
+
 
 /**
   * Created by superorange on 9/6/16.
   */
 object Utilities {
   //-------spark conf-------------
+  val master = ConfigFactory.load().getConfig("userdefine").getString("sparkMode")
 
-  val master = "local"//spark://ubuntu:7077"
 //-------machine learning algorithm
   val modelFolder = "Model"
   val linearModel = "LinearRegression"
@@ -24,6 +26,7 @@ object Utilities {
   val path = "path"
   //---------downloadpath
 
-  val Dpath = "/home/superorange/test"
+  val workingFolder = ConfigFactory.load().getConfig("userdefine").getString("workingFolder")
+  val Dpath = workingFolder+"/"+ConfigFactory.load().getConfig("userdefine").getString("downloadPath")
 
 }

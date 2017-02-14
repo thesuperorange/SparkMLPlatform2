@@ -339,7 +339,7 @@ class Preprocess @Inject()(db: Database)(val messagesApi: MessagesApi) extends C
             tempdf = tempdf.withColumn(castme, tempdf(castme).cast(StringType))
           }
         }
-        tempdf.write.parquet(jeffrey+"/"+outputFolder)
+        tempdf.write.parquet(Utilities.workingFolder+"/"+jeffrey+"/"+outputFolder)
 
         DB.insertPre1(outputFolder,inputFilename,jeffrey)
 
@@ -382,7 +382,7 @@ class Preprocess @Inject()(db: Database)(val messagesApi: MessagesApi) extends C
         var errmessage = ""
         try{
 
-          val df = SparkSession.read.load(jeffrey+"/"+path)
+          val df = SparkSession.read.load(Utilities.workingFolder+"/"+jeffrey+"/"+path)
           jsonString = createJsonArray(df)
         } catch {
           case e: Exception =>
@@ -398,7 +398,7 @@ class Preprocess @Inject()(db: Database)(val messagesApi: MessagesApi) extends C
           Ok(html.showtext(errmessage,jeffrey,4))
 
         }else{
-          Ok(html.preprocess.dataimport_pre2(InputForms.csvPathIn.fill(jeffrey+"/"+path), null,jsonString,jeffrey))
+          Ok(html.preprocess.dataimport_pre2(InputForms.csvPathIn.fill(Utilities.workingFolder+"/"+jeffrey+"/"+path), null,jsonString,jeffrey))
         }
 
       }
@@ -432,7 +432,7 @@ class Preprocess @Inject()(db: Database)(val messagesApi: MessagesApi) extends C
           val colNames = df.columns
           val assembler = new VectorAssembler().setInputCols(colNames).setOutputCol("features")
           val df2 = assembler.transform(df).select("features")
-          df2.write.parquet(jeffrey+"/"+outputFolder)
+          df2.write.parquet(Utilities.workingFolder+"/"+jeffrey+"/"+outputFolder)
 
           DB.insertPre2(outputFolder, inputFilename, false,jeffrey)
           //DB.insertPre2(jeffrey+"/"+outputFolder, inputFilename, true,jeffrey)
@@ -554,7 +554,7 @@ class Preprocess @Inject()(db: Database)(val messagesApi: MessagesApi) extends C
         }
         else transformed = transformed.withColumn("label", transformed(labelColumn).cast(DoubleType)).select("features", "label")
 
-        transformed.write.parquet(jeffrey + "/" + outputFolder)
+        transformed.write.parquet(Utilities.workingFolder+"/"+jeffrey + "/" + outputFolder)
 
         //insert into sql
         DB.insertPre2(outputFolder, inputFilename, labelTag, jeffrey)
