@@ -152,8 +152,9 @@ class Preprocess @Inject()(db: Database)(val messagesApi: MessagesApi) extends C
         println("NLname", file)
         val DB = new DatabaseCon(db)
 
-        var path = DB.getPath(file)
-        println("path", path)
+       // var path = DB.getPath(file)
+       // println("path", path)
+        val path = Utilities.workingFolder+"/"+file
         val SPARK = new SparkConfCreator(Utilities.master, this.getClass.getSimpleName)
 
         val sc = SPARK.getSC()

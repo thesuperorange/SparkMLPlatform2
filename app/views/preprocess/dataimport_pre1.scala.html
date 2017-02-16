@@ -1,5 +1,5 @@
 @import helper._
-@(guestSelect: Form[(String,Boolean)],data:List[String],csvInput: Form[(String,Boolean)],header:String,datatype: Seq[(String, String)], summary: Form[StatSummary],corMatrix:String,user:String)(implicit messages: Messages)
+@(guestSelect: Form[(String,Boolean)],defaultcsv :String,csvInput: Form[(String,Boolean)],header:String,datatype: Seq[(String, String)], summary: Form[StatSummary],corMatrix:String,user:String)(implicit messages: Messages)
 
 
 @main(title = "Data import--preprocess1",test = user) {
@@ -42,7 +42,7 @@
                                     <div class="form-group">
                                     @select(
                                         guestSelect("file"),
-                                        options(data),
+                                        options(List(defaultcsv)),
                                         '_class->"col-sm-offset-1 col-sm-10",
                                         '_showConstraints -> false,
                                         '_label -> "file")
@@ -234,6 +234,10 @@
                 form.appendChild(table);
 
                 form.appendChild(document.createElement("br"));
+
+
+                @if(user!="NULL"&&user!="outsider"&&user!="") {
+
                 form.appendChild(document.createTextNode("Output name"));
                 var outputPath = document.createElement("input");
                 outputPath.type='text';
@@ -244,8 +248,6 @@
                 form.appendChild(document.createElement("br"));
                 form.appendChild(document.createElement("br"));
 
-
-
                 var button = document.createElement("button");
                 var t = document.createTextNode("SAVE");
                 button.type='submit';
@@ -255,7 +257,7 @@
                 button.setAttribute('class','btn btn-default');
                 button.appendChild(t);
                 form.appendChild(button);
-
+                }
                 var container=document.createElement("div");
                 container.className='container';
                 container.appendChild(form);

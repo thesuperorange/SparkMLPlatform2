@@ -222,7 +222,7 @@ class DatabaseCon(db: Database) {
     }
      dbname
   }
-  def getPathInfo(user:String): List[String] = {
+  /*def getPathInfo(user:String): List[String] = {
     val tablename = Utilities.path
     val conn = db.getConnection()
     var dbname = List[String]()
@@ -255,7 +255,7 @@ class DatabaseCon(db: Database) {
       conn.close()
     }
      pa
-  }
+  }*/
 
 
   def insertModel(outputPathName:String, modelType: String, user:String)={

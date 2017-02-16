@@ -28,5 +28,5 @@ object Utilities {
 
   val workingFolder = ConfigFactory.load().getConfig("userdefine").getString("workingFolder")
   val Dpath = workingFolder+"/"+ConfigFactory.load().getConfig("userdefine").getString("downloadPath")
-
+  val defaultCsv = ConfigFactory.load().getConfig("userdefine").getString("defaultCsv")
 }

@@ -146,17 +146,20 @@
                         outputPath.required='required';
                         outputPath.name = 'outputFolder';
                         form.appendChild(outputPath);
-                    }
+
                     form.appendChild(document.createElement("br"));
                     form.appendChild(document.createElement("br"));
 
+                    var button = document.createElement("button");
+                    var t = document.createTextNode("SAVE");
+                    button.type='submit';
+                    // button.id='saveto'
+                    //button.value='save'
 
-                    @if(user!="NULL"&&user!="outsider"&&user!="") {
-                        var button = document.createElement("input");
-                        button.type='submit';
-                        button.id='saveto';
-                        button.value='save';
-                        form.appendChild(button);
+                    button.setAttribute('class','btn btn-default');
+                    button.appendChild(t);
+                    form.appendChild(button);
+
                     }
 
 

@@ -88,10 +88,10 @@ class Entrance @Inject()(db: Database)(val messagesApi: MessagesApi) extends Con
     InputForms.InputParam.fill("sss",false)
     request.session.get("username").map {user=>
       val DB = new DatabaseCon(db)
-      Ok(html.preprocess.dataimport_pre1(InputForms.guestSelect, DB.getPathInfo(user),InputForms.InputParam,null,null,null,null,user))
+      Ok(html.preprocess.dataimport_pre1(InputForms.guestSelect, null,InputForms.InputParam,null,null,null,null,user))
     }.getOrElse {
       val DB = new DatabaseCon(db)
-      Ok(html.preprocess.dataimport_pre1(InputForms.guestSelect,DB.getPathInfo("NULL"),InputForms.InputParam,null,null,null,null,"NULL"))
+      Ok(html.preprocess.dataimport_pre1(InputForms.guestSelect,Utilities.defaultCsv,InputForms.InputParam,null,null,null,null,"NULL"))
     }
   }
 
