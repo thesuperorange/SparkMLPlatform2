@@ -63,7 +63,7 @@ class Ckantest @Inject()(db: Database)(val messagesApi: MessagesApi) extends Con
           if (!directory.exists()) directory.mkdir()
 
           if (!err) {
-            val path = username + "/" + filename.toString
+            val path = Utilities.workingFolder+"/"+username + "/" + filename.toString
             val SPARK = new SparkConfCreator(Utilities.master, this.getClass.getSimpleName)
             val sc = SPARK.getSC()
             val sparkSession = SPARK.getSession()
