@@ -59,7 +59,7 @@ class Ckantest @Inject()(db: Database)(val messagesApi: MessagesApi) extends Con
           }
 
           /** user existed?  **/
-          val directory: File = new File(username);
+          val directory: File = new File(Utilities.workingFolder+"/"+username);
           if (!directory.exists()) directory.mkdir()
 
           if (!err) {
