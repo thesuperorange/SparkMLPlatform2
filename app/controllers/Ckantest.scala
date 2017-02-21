@@ -79,6 +79,8 @@ class Ckantest @Inject()(db: Database)(val messagesApi: MessagesApi) extends Con
                 .csv(path)
 
               datatype = df.dtypes
+              val numColCount = datatype.takeWhile(_._2!="StringType").size
+              if(numColCount!=0) {
               val columnNames = df.columns.map(x=>x.replaceAll(" ",""))
               //df.show
               val isStringArr = new Array[(Boolean, String)](df.columns.size)
@@ -103,36 +105,38 @@ class Ckantest @Inject()(db: Database)(val messagesApi: MessagesApi) extends Con
 
 
 
-              val summaryResult: MultivariateStatisticalSummary = Statistics.colStats(parseData)
+                val summaryResult: MultivariateStatisticalSummary = Statistics.colStats(parseData)
 
-              val corMatrix = Statistics.corr(parseData)
+                val corMatrix = Statistics.corr(parseData)
 
-              //heat map
-              val lM = corMatrix.toArray.grouped(corMatrix.numRows).toArray
-              for (i <- 0 to lM.length - 1) {
-                var a = columnNames(i)
-                lM(i).foreach(x => {
-                  val a = List(BigDecimal(x).setScale(3, BigDecimal.RoundingMode.HALF_UP).toDouble);
-                })
-
-                var list = List[Double]()
-                lM(i).foreach(
-                  x => {
-                    list = list :+ BigDecimal(x).setScale(3, BigDecimal.RoundingMode.HALF_UP).toDouble
+                //heat map
+                val lM = corMatrix.toArray.grouped(corMatrix.numRows).toArray
+                for (i <- 0 to lM.length - 1) {
+                  var a = columnNames(i)
+                  lM(i).foreach(x => {
+                    val a = List(BigDecimal(x).setScale(3, BigDecimal.RoundingMode.HALF_UP).toDouble);
                   })
-                finalString = finalString merge org.json4s.jackson.renderJValue(a, list)
+
+                  var list = List[Double]()
+                  lM(i).foreach(
+                    x => {
+                      list = list :+ BigDecimal(x).setScale(3, BigDecimal.RoundingMode.HALF_UP).toDouble
+                    })
+                  finalString = finalString merge org.json4s.jackson.renderJValue(a, list)
+                }
+
+
+                val x = Map(
+                  "max" -> summaryResult.max.toString,
+                  "mean" -> summaryResult.mean.toString,
+                  "min" -> summaryResult.min.toString,
+                  "variance" -> summaryResult.variance.toString,
+                  "numNonZero" -> summaryResult.numNonzeros.toString,
+                  "count" -> summaryResult.count.toString
+                )
+                boundForm = InputForms.summaryForm.bind(x)
               }
 
-
-              val x = Map(
-                "max" -> summaryResult.max.toString,
-                "mean" -> summaryResult.mean.toString,
-                "min" -> summaryResult.min.toString,
-                "variance" -> summaryResult.variance.toString,
-                "numNonZero" -> summaryResult.numNonzeros.toString,
-                "count" -> summaryResult.count.toString
-              )
-              boundForm = InputForms.summaryForm.bind(x)
             } catch {
               case e: Exception =>
                 err = true

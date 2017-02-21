@@ -33,10 +33,32 @@ class Preprocess @Inject()(db: Database)(val messagesApi: MessagesApi) extends C
     }.getOrElse {
       jeffrey = "NULL"
     }
+
+    var pathV=""
+    var headerV=true
+
     if(jeffrey!="NULL"){
     InputForms.InputParam.bindFromRequest.fold(
-      formWithErrors => BadRequest("error"), { case (path,header) =>
+      formWithErrors => BadRequest("error"), { case (path, header) => {
+        pathV = path
+        headerV = header
+      }
+      })}else {
+      InputForms.guestSelect.bindFromRequest.fold(
+        formWithErrors => BadRequest("error"), { case (file, header) =>
+          var jeffrey = ""
+          request.session.get("username").map { user =>
+            jeffrey = user
+          }.getOrElse {
+            jeffrey = "NULL"
+          }
+          val DB = new DatabaseCon(db)
 
+          pathV = Utilities.workingFolder + "/" + file
+          headerV = header
+        }
+          )
+    }
 
         val SPARK = new SparkConfCreator(Utilities.master,this.getClass.getSimpleName)
 
@@ -47,73 +69,93 @@ class Preprocess @Inject()(db: Database)(val messagesApi: MessagesApi) extends C
         var datatype: Array[(String, String)] =Array()
         var boundForm: Form[StatSummary] = InputForms.summaryForm
         var finalString=org.json4s.jackson.renderJValue("")
-        var err:Boolean= true
+        var err= 0
         var errmessage = ""
         try {
-          println("path",path)
+          println("path", pathV)
 
           val df = sparkSession.read
-            .option("header", header.toString) // Use first line of all files as header
+            .option("header", headerV.toString) // Use first line of all files as header
             .option("inferSchema", "true") // Automatically infer data types
-            .csv(path)
+            .csv(pathV)
 
 
-          datatype= df.dtypes
-          val columnNames = df.columns.map(x=>x.replaceAll(" ",""))
-          val isStringArr = new Array[(Boolean,String)](df.columns.size)
+          datatype = df.dtypes
+          datatype.map(println)
+          val numColCount = datatype.filter(_._2 != "StringType").size
+          println("numColCount: "+numColCount)
 
-          datatype.zipWithIndex.foreach(x=> {
-            if (x._1._2 == "StringType"){ isStringArr(x._2) = (true,x._1._1)}
-            else{isStringArr(x._2) = (false,x._1._1)}
-          }
-          )
+          if (numColCount != 0) {
 
 
-          val rawData = sc.textFile(path).filter(_.nonEmpty)
+            val columnNames = df.columns.map(x => x.replaceAll(" ", ""))
+            val isStringArr = new Array[(Boolean, String)](df.columns.size)
 
-          val parseData = rawData.zipWithIndex.filter(_._2>2).map{line=>
-            Vectors.dense(
-              line._1.replaceAll("\"", "").trim.split(",").zipWithIndex.filter(x=>  !isStringArr(x._2.toInt)._1  ).map(_._1.toDouble)
-            )
-          }
-
-          val summaryResult: MultivariateStatisticalSummary = Statistics.colStats(parseData)
-
-          println("mean",summaryResult.mean)
-          val corMatrix =Statistics.corr(parseData)
-          //println("cor",corMatrix)
-          //corMatrix.numCols
-
-          //val corResult = corMatrix.toArray.map(x=>Math.round(x*1000.0)/1000.0)
-          //println(corMatrix)
-          //heat map
-          val lM = corMatrix.toArray.grouped(corMatrix.numRows).toArray
-          //println("Lm",lM)
-          for(i<-0 to lM.length-1){
-            var a=columnNames(i)
-
-            lM(i).foreach(x=>{val a = List(BigDecimal(x).setScale(3, BigDecimal.RoundingMode.HALF_UP).toDouble); })
-
-            var list = List[Double]()
-            lM(i).foreach(
-              x=> {
-                list = list :+ BigDecimal(x).setScale(3, BigDecimal.RoundingMode.HALF_UP).toDouble
+            datatype.zipWithIndex.foreach(x => {
+              if (x._1._2 == "StringType") {
+                isStringArr(x._2) = (true, x._1._1)
               }
+              else {
+                isStringArr(x._2) = (false, x._1._1)
+              }
+            }
             )
-            finalString = finalString merge org.json4s.jackson.renderJValue(a, list)
-            //println(finalString)
-          }
-          println("mean",summaryResult.mean)
 
-          val x = Map(
-            "max" -> summaryResult.max.toString,
-            "mean" -> summaryResult.mean.toString,
-            "min" -> summaryResult.min.toString,
-            "variance" -> summaryResult.variance.toString,
-            "numNonZero" -> summaryResult.numNonzeros.toString,
-            "count" -> summaryResult.count.toString
-          )
-          boundForm = InputForms.summaryForm.bind(x)
+
+            val rawData = sc.textFile(pathV).filter(_.nonEmpty)
+
+            val parseData = rawData.zipWithIndex.filter(_._2 > 2).map { line =>
+              Vectors.dense(
+                line._1.replaceAll("\"", "").trim.split(",").zipWithIndex.filter(x => !isStringArr(x._2.toInt)._1).map(_._1.toDouble)
+              )
+            }
+
+            val summaryResult: MultivariateStatisticalSummary = Statistics.colStats(parseData)
+
+            println("mean", summaryResult.mean)
+            val corMatrix = Statistics.corr(parseData)
+            //println("cor",corMatrix)
+            //corMatrix.numCols
+
+            //val corResult = corMatrix.toArray.map(x=>Math.round(x*1000.0)/1000.0)
+            //println(corMatrix)
+            //heat map
+            val lM = corMatrix.toArray.grouped(corMatrix.numRows).toArray
+            //println("Lm",lM)
+            for (i <- 0 to lM.length - 1) {
+              var a = columnNames(i)
+
+              lM(i).foreach(x => {
+                val a = List(BigDecimal(x).setScale(3, BigDecimal.RoundingMode.HALF_UP).toDouble);
+              })
+
+              var list = List[Double]()
+              lM(i).foreach(
+                x => {
+                  list = list :+ BigDecimal(x).setScale(3, BigDecimal.RoundingMode.HALF_UP).toDouble
+                }
+              )
+              finalString = finalString merge org.json4s.jackson.renderJValue(a, list)
+              //println(finalString)
+            }
+            println("mean", summaryResult.mean)
+
+            val x = Map(
+              "max" -> summaryResult.max.toString,
+              "mean" -> summaryResult.mean.toString,
+              "min" -> summaryResult.min.toString,
+              "variance" -> summaryResult.variance.toString,
+              "numNonZero" -> summaryResult.numNonzeros.toString,
+              "count" -> summaryResult.count.toString
+            )
+            boundForm = InputForms.summaryForm.bind(x)
+          }
+          else{
+            boundForm=null
+            err=2
+            errmessage ="all columns are category, it's not suitable for machine learning"
+
+          }
         }
         catch {
           case e: Exception =>
@@ -121,7 +163,7 @@ class Preprocess @Inject()(db: Database)(val messagesApi: MessagesApi) extends C
             println("error in preprocess:" + e)
             errmessage = "error in preprocess:" + e
             SPARK.closeAll()
-            err=false
+            err=1
 
 
         } finally {
@@ -129,139 +171,15 @@ class Preprocess @Inject()(db: Database)(val messagesApi: MessagesApi) extends C
           //Ok(html.preprocess.dataimport_pre1(null,null,InputForms.InputParam.fill(path,false),header.toString,datatype, boundForm, pretty(finalString),jeffrey))
 
         }
-        if(err) {
-          Ok(html.preprocess.dataimport_pre1(null, null, InputForms.InputParam.fill(path, false), header.toString, datatype, boundForm, pretty(finalString), jeffrey))
-        }else{
+        if(err==0) {
+          Ok(html.preprocess.dataimport_pre1(null, null, InputForms.InputParam.fill(pathV, false), headerV.toString, datatype, boundForm, pretty(finalString), jeffrey))
+        }
+        else if(err==2){
+          Ok(html.showtext(errmessage,jeffrey,3))
+        } else {
           Ok(html.showtext(errmessage,jeffrey,4))
         }
 
-        }
-
-    )
-    }else{
-    InputForms.guestSelect.bindFromRequest.fold(
-      formWithErrors => BadRequest("error"), { case (file, header) =>
-
-        var jeffrey = ""
-        //var path = ""
-        request.session.get("username").map { user =>
-          jeffrey = user
-        }.getOrElse {
-          jeffrey = "NULL"
-        }
-        println("NLname", file)
-        val DB = new DatabaseCon(db)
-
-       // var path = DB.getPath(file)
-       // println("path", path)
-        val path = Utilities.workingFolder+"/"+file
-        val SPARK = new SparkConfCreator(Utilities.master, this.getClass.getSimpleName)
-
-        val sc = SPARK.getSC()
-        val sparkSession = SPARK.getSession()
-
-
-        var datatype: Array[(String, String)] = Array()
-        var boundForm: Form[StatSummary] = InputForms.summaryForm
-        var finalString = org.json4s.jackson.renderJValue("")
-        var err: Boolean = true
-        var errmessage = ""
-        try {
-
-
-          val df = sparkSession.read
-            .option("header", header.toString) // Use first line of all files as header
-            .option("inferSchema", "true") // Automatically infer data types
-            .csv(path)
-
-
-          datatype = df.dtypes
-          val columnNames = df.columns
-          df.show
-          val isStringArr = new Array[(Boolean, String)](df.columns.size)
-
-          datatype.zipWithIndex.foreach(x => {
-            if (x._1._2 == "StringType") {
-              isStringArr(x._2) = (true, x._1._1)
-            }
-            else {
-              isStringArr(x._2) = (false, x._1._1)
-            }
-          }
-          )
-
-
-          val rawData = sc.textFile(path)
-
-          val parseData = rawData.zipWithIndex.filter(_._2 > 2).map { line =>
-            Vectors.dense(
-              line._1.trim.split(",").zipWithIndex.filter(x => !isStringArr(x._2.toInt)._1).map(_._1.toDouble)
-            )
-          }
-
-          val summaryResult: MultivariateStatisticalSummary = Statistics.colStats(parseData)
-
-          println("mean", summaryResult.mean)
-          val corMatrix = Statistics.corr(parseData)
-          //println("cor",corMatrix)
-          //corMatrix.numCols
-
-          //val corResult = corMatrix.toArray.map(x=>Math.round(x*1000.0)/1000.0)
-          //println(corMatrix)
-          //heat map
-          val lM = corMatrix.toArray.grouped(corMatrix.numRows).toArray
-          //println("Lm",lM)
-          for (i <- 0 to lM.length - 1) {
-            var a = columnNames(i)
-
-            lM(i).foreach(x => {
-              val a = List(BigDecimal(x).setScale(3, BigDecimal.RoundingMode.HALF_UP).toDouble)
-            })
-
-            var list = List[Double]()
-            lM(i).foreach(
-              x => {
-                list = list :+ BigDecimal(x).setScale(3, BigDecimal.RoundingMode.HALF_UP).toDouble
-              }
-            )
-            finalString = finalString merge org.json4s.jackson.renderJValue(a, list)
-            //println(finalString)
-          }
-          println("mean", summaryResult.mean)
-
-          val x = Map(
-            "max" -> summaryResult.max.toString,
-            "mean" -> summaryResult.mean.toString,
-            "min" -> summaryResult.min.toString,
-            "variance" -> summaryResult.variance.toString,
-            "numNonZero" -> summaryResult.numNonzeros.toString,
-            "count" -> summaryResult.count.toString
-          )
-          boundForm = InputForms.summaryForm.bind(x)
-        }
-        catch {
-          case e: Exception =>
-
-            println("error in preprocess:" + e)
-            err = false
-            errmessage = "error in preprocess:" + e
-            SPARK.closeAll()
-
-
-        } finally {
-          SPARK.closeAll()
-
-        }
-        if (err) {
-          Ok(html.preprocess.dataimport_pre1(null, null, InputForms.InputParam.fill(path, false), header.toString, datatype, boundForm, pretty(finalString), jeffrey))
-        }else{
-          Ok(html.showtext(errmessage,jeffrey,4))
-        }
-
-      }
-
-    )
-    }
 
   }
 
