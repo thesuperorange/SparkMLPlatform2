@@ -79,7 +79,7 @@ class Ckantest @Inject()(db: Database)(val messagesApi: MessagesApi) extends Con
                 .csv(path)
 
               datatype = df.dtypes
-              val numColCount = datatype.takeWhile(_._2!="StringType").size
+              val numColCount = datatype.filter(_._2!="StringType").size
               if(numColCount!=0) {
               val columnNames = df.columns.map(x=>x.replaceAll(" ",""))
               //df.show
